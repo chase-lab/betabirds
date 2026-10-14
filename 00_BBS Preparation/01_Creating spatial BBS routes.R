@@ -1,9 +1,8 @@
 ############################################################################################
 ########                                                                            ########
-########              Determining spatial coordinates of BBS routes                 ######## 
+########              Determining spatial coordinates of BBS routes                 ########
 ########                                                                            ########
 ############################################################################################
-
 
 # This code creates a simple features (package sf) dataframe of spatial points for each route
 # in the North American Breeding Bird Survey Dataset (subsetted to SW as a pilot).
@@ -15,12 +14,12 @@
 # https://www.mbr-pwrc.usgs.gov/bbs/geographic_information/Instructions_trend_route.htm
 
 # This shapefile of routes is from the 2004 release, the USGS no longer maintains
-# data on the route paths so we have to work with what we have. 
+# data on the route paths so we have to work with what we have.
 
 ########## clean workspace and load required packages ####################
 
 # clean workspace to improve efficiency: #
-rm(list = ls() )
+rm(list = ls())
 gc() #releases memory
 
 library(sp)
@@ -43,18 +42,17 @@ path <- "~/share/groups/mas/01_projects/iUpdate/Beta Diversity with Pao_paper/"
 
 # Deciding which projection to use
 # https://gis.stackexchange.com/questions/104005/choosing-projected-coordinate-system-for-mapping-all-us-states
-# Albers Equal Area Conic (Heinrich Albers, 1805): Like Lambert Conformal Conic, 
+# Albers Equal Area Conic (Heinrich Albers, 1805): Like Lambert Conformal Conic,
 # this is a very popular map projection for the US, Canada and other continental/large countries
 # with a primarily E-W extent. Used by the USGS for maps showing the conterminous United States
 # (48 states) or large areas of the United States. Used for many thematic maps, especially
 # choropleth and dot density maps.
 
-# From searchable list of codes at http://www.spatialreference.org 
+# From searchable list of codes at http://www.spatialreference.org
 # Could not actually find the epsg code for this reference though
 # EPSG code found at this site
 #https://guides.library.duke.edu/r-geospatial/CRS
 # epsg 5070: USA_Contiguous_Albers_Equal_Area_Conic
-
 
 ###############################################
 ###                                         ###
@@ -62,32 +60,32 @@ path <- "~/share/groups/mas/01_projects/iUpdate/Beta Diversity with Pao_paper/"
 ###                                         ###
 ###############################################
 
-
 # Define the coordinate system
-albers = sp:: CRS("+init=epsg:5070")
+albers <- sp::CRS("+init=epsg:5070")
 
 # Load USA and Canada shapefile
-usa.shape <- sf :: st_read(paste(path, "/00_Data/Raw/USACANAB.shp",
-                                 sep = ""))
+usa.shape <- sf::st_read(paste(path, "/00_Data/Raw/USACANAB.shp", sep = ""))
 
 # Define coordintate system as albers:
-usa.shape <- sf :: st_set_crs( usa.shape, albers )
+usa.shape <- sf::st_set_crs(usa.shape, albers)
 
 
 # Load BBS routes shapefile
-route.shapefile <- sf :: st_read(paste(path, 
-                                       "/00_Data/Raw/BBS/GIS/nabbs02_mis_alb.shp",
-                                       sep = ""))
+route.shapefile <- sf::st_read(paste(
+  path,
+  "/00_Data/Raw/BBS/GIS/nabbs02_mis_alb.shp",
+  sep = ""
+))
 
 # Define coordintate system as albers:
-route.shapefile <- sf :: st_set_crs( route.shapefile, albers )
+route.shapefile <- sf::st_set_crs(route.shapefile, albers)
 
 
 # Load the BBS route data
-bbs_route.data <- read.csv(paste(path, "/00_Data/Processed/BBS/1st Cleaning/BBS_Routes.csv",
-                                 sep = ""),
-                           header = TRUE)
-
+bbs_route.data <- read.csv(
+  paste(path, "/00_Data/Processed/BBS/1st Cleaning/BBS_Routes.csv", sep = ""),
+  header = TRUE
+)
 
 
 ###############################################
@@ -98,13 +96,14 @@ bbs_route.data <- read.csv(paste(path, "/00_Data/Processed/BBS/1st Cleaning/BBS_
 ###############################################
 
 # Make bbs.route.data an sf object (lat, long in degrees)
-bbs_route.data_sf <- sf :: st_as_sf(x = bbs_route.data,
-                          coords = c("Longitude", "Latitude"),
-                          crs = "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0")
+bbs_route.data_sf <- sf::st_as_sf(
+  x = bbs_route.data,
+  coords = c("Longitude", "Latitude"),
+  crs = "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0"
+)
 
 # Convert crs to albers:
-bbs_route.data_sf <- sf :: st_transform( bbs_route.data_sf, albers )
-
+bbs_route.data_sf <- sf::st_transform(bbs_route.data_sf, albers)
 
 
 ###############################################
@@ -115,11 +114,11 @@ bbs_route.data_sf <- sf :: st_transform( bbs_route.data_sf, albers )
 ###############################################
 
 # The spatial data provided in the BBS download gives the starting point of
-# each route. We need to match the starting point to the vector of route 
+# each route. We need to match the starting point to the vector of route
 # shapes.
 
 # Find the route shape feature that is closest to the bbs observations (point)
-closest.route <- st_nearest_feature(bbs_route.data_sf, route.shapefile) 
+closest.route <- st_nearest_feature(bbs_route.data_sf, route.shapefile)
 
 # Check that the order of the vector of indices for the closest linestring lines up
 # with the corresponding point
@@ -135,9 +134,11 @@ plot(bbs_route.data_sf$geometry[1], add = TRUE)
 ###############################################
 
 # Find the nearest points on the linestrings
-nearest.points <- st_nearest_points(bbs_route.data_sf, 
-                                    route.shapefile[closest.route, ],
-                                    pairwise = TRUE)
+nearest.points <- st_nearest_points(
+  bbs_route.data_sf,
+  route.shapefile[closest.route, ],
+  pairwise = TRUE
+)
 # Calculate distances
 distances <- st_length(nearest.points)
 
@@ -150,17 +151,15 @@ ggplot(df, aes(x = distance)) +
   geom_histogram(binwidth = 100, fill = "steelblue", color = "black") +
   scale_x_continuous(lim = c(0, 2500)) +
   scale_y_continuous(lim = c(0, 300)) +
-  labs(title = "Histogram of Distances",
-       x = "Distance",
-       y = "Frequency") +
+  labs(title = "Histogram of Distances", x = "Distance", y = "Frequency") +
   theme_minimal()
 
-# We need to set a threshold for the distance which we fine to be too far to 
+# We need to set a threshold for the distance which we fine to be too far to
 # confidently say that the starting point of the route matches the linestring
 # of the route
 # 1 km (1000 meters) seems appropriate
 
-# Add the distances to bbs_route.data_sf 
+# Add the distances to bbs_route.data_sf
 bbs_route.data_sf$dist_to_route <- distances
 
 
@@ -177,12 +176,12 @@ updated.route.shapefile <- route.shapefile[closest.route, ]
 
 # Create a dataframe with all the information in both the bbs routes df and the
 # updated.route df but with the point geometry only
-bbs_route.data_sf.point <- cbind(bbs_route.data_sf, updated.route.shapefile) 
+bbs_route.data_sf.point <- cbind(bbs_route.data_sf, updated.route.shapefile)
 bbs_route.data_sf.point$geometry.1 <- NULL
 
 # Create a dataframe with all the information in both the bbs routes df and the
 # updated.route df but with the route shape (linestring) geometry only
-bbs_route.data_sf.line <- cbind(bbs_route.data_sf, updated.route.shapefile) 
+bbs_route.data_sf.line <- cbind(bbs_route.data_sf, updated.route.shapefile)
 
 # Set the geometry column to the linestring geometry
 st_geometry(bbs_route.data_sf.line) <- bbs_route.data_sf.line$geometry.1
@@ -192,7 +191,6 @@ bbs_route.data_sf.line$geometry.1 <- NULL
 
 # Ensure that 'geometry' is now the active geometry column
 st_geometry(bbs_route.data_sf.line) <- st_geometry(bbs_route.data_sf.line)
-
 
 
 ###############################################
@@ -205,12 +203,13 @@ st_geometry(bbs_route.data_sf.line) <- st_geometry(bbs_route.data_sf.line)
 # Make a sepearate dataframe (to aid in visual inspection) with the route
 # names
 
-name.comparison <- data.frame(Point.Name = bbs_route.data_sf.point$RouteName,
-                              Line.Name = bbs_route.data_sf.point$SRTENAME,
-                              Logical = bbs_route.data_sf.point$RouteName == 
-                                bbs_route.data_sf.point$SRTENAME,
-                              Distance = 
-                                as.integer(bbs_route.data_sf.point$dist_to_route))
+name.comparison <- data.frame(
+  Point.Name = bbs_route.data_sf.point$RouteName,
+  Line.Name = bbs_route.data_sf.point$SRTENAME,
+  Logical = bbs_route.data_sf.point$RouteName ==
+    bbs_route.data_sf.point$SRTENAME,
+  Distance = as.integer(bbs_route.data_sf.point$dist_to_route)
+)
 
 # Examine the frequency of true/falses
 name.comparison %>%
@@ -225,7 +224,7 @@ name.comparison %>%
 # than matching the names because for some routes it seems the naming convention
 # changed either slightly or to a total renaming.
 
-# check if after removing the high distances does this reduce the number of 
+# check if after removing the high distances does this reduce the number of
 # falses
 name.comparison_reduced <- name.comparison %>%
   filter(Distance <= 1000)
@@ -248,16 +247,13 @@ bbs_route.data_sf.line <- bbs_route.data_sf.line %>%
   filter(dist_to_route <= set_units(1000, "m"))
 
 bbs_route.data_sf.point <- bbs_route.data_sf.point %>%
-  filter(dist_to_route <= set_units(1000, "m")) 
-
+  filter(dist_to_route <= set_units(1000, "m"))
 
 
 # examine results
-plot(bbs_route.data_sf.line$geometry,
-     col = "black")
+plot(bbs_route.data_sf.line$geometry, col = "black")
 plot(usa.shape$geometry, add = TRUE)
-plot(bbs_route.data_sf.point$geometry, 
-     col = "red", add = TRUE)
+plot(bbs_route.data_sf.point$geometry, col = "red", add = TRUE)
 
 
 ###############################################
@@ -269,11 +265,11 @@ plot(bbs_route.data_sf.point$geometry,
 
 # Write each sf dataframe as a geo json file
 
-st_write(bbs_route.data_sf.point, 
-         paste(path, "/00_Data/Processed/BBS/BBS_All_Rtes_Point.shp",
-                                        sep = ""))
-st_write(bbs_route.data_sf.line, 
-         paste(path, "/00_Data/Processed/BBS/BBS_All_Rtes_Linestring.shp",
-                                       sep = ""))
-
-
+st_write(
+  bbs_route.data_sf.point,
+  paste(path, "/00_Data/Processed/BBS/BBS_All_Rtes_Point.shp", sep = "")
+)
+st_write(
+  bbs_route.data_sf.line,
+  paste(path, "/00_Data/Processed/BBS/BBS_All_Rtes_Linestring.shp", sep = "")
+)

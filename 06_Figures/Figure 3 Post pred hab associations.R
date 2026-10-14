@@ -16,10 +16,9 @@
 # association abundances were reduced in the later time period relative to the
 # earlier time period.
 
-
 # Clean workspace
-rm(list = ls() )
-gc()  
+rm(list = ls())
+gc()
 
 
 # Load required packages
@@ -35,7 +34,6 @@ library(forcats)
 path <- "~/share/groups/mas/01_projects/iUpdate/Beta Diversity with Pao_paper/"
 
 
-
 #####################################
 ###                               ###
 ###       Data Loading            ###
@@ -43,14 +41,21 @@ path <- "~/share/groups/mas/01_projects/iUpdate/Beta Diversity with Pao_paper/"
 #####################################
 
 # Read in the model
-model <- readRDS(paste(path,
-                       "01_Analysis/IUCN Habitats/Model Objects/Habitats.rds",
-                       sep = ""))
+model <- readRDS(paste(
+  path,
+  "01_Analysis/IUCN Habitats/Model Objects/Habitats.rds",
+  sep = ""
+))
 
 # Read in underlying data of the model
-hab.freq_long <- read.csv(paste(path, "01_Analysis/IUCN Habitats/Abundance and Habitat data.csv",
-                                sep = ""),
-                          header = TRUE)
+hab.freq_long <- read.csv(
+  paste(
+    path,
+    "01_Analysis/IUCN Habitats/Abundance and Habitat data.csv",
+    sep = ""
+  ),
+  header = TRUE
+)
 
 
 #####################################
@@ -63,7 +68,9 @@ hab.freq_long <- read.csv(paste(path, "01_Analysis/IUCN Habitats/Abundance and H
 hab.freq_long$ID_200 <- as.factor(hab.freq_long$ID_200)
 hab.freq_long$Species1 <- as.factor(hab.freq_long$Species1)
 hab.freq_long$Time <- as.factor(hab.freq_long$Time)
-hab.freq_long$n_habitat_associations <- as.factor(hab.freq_long$n_habitat_associations) 
+hab.freq_long$n_habitat_associations <- as.factor(
+  hab.freq_long$n_habitat_associations
+)
 
 
 # Draw predicted means at each time x habitat combination on the response scale
@@ -75,7 +82,7 @@ hab_levels <- hab_levels[-7]
 time_levels <- levels(hab.freq_long$Time)
 
 nd_diff <- expand_grid(
-  Time                   = time_levels,   # "t1","t12"
+  Time = time_levels, # "t1","t12"
   n_habitat_associations = hab_levels
 ) %>%
   mutate(.row_id = row_number())
@@ -85,7 +92,7 @@ diff_draws <- nd_diff %>%
   add_epred_draws(
     object = model,
     value = ".value",
-    re_formula = NA     # omit random effects
+    re_formula = NA # omit random effects
   )
 
 # Compute t12 - t1 via a self-join
@@ -106,8 +113,8 @@ diff_draws_diff <- diff_t12 %>%
 # Sanity check
 diff_draws_diff %>%
   summarise(
-    n       = n(),
-    n_na    = sum(is.na(diff)),
+    n = n(),
+    n_na = sum(is.na(diff)),
     n_nonna = sum(!is.na(diff))
   )
 
@@ -119,31 +126,33 @@ diff_draws_diff <- diff_draws_diff %>%
       levels = c("6", "5", "4", "3", "2", "1")
     )
   ) %>%
-  arrange(n_habitat_associations)  # 1–6 drawn in this row order
+  arrange(n_habitat_associations) # 1–6 drawn in this row order
 
 # Sort so that 1,2,3 come first and 6, 5, 4, last
 diff_draws_diff <- diff_draws_diff %>%
   mutate(
     n_habitat_associations = factor(
       n_habitat_associations,
-      levels = c("1","2","3","4","5","6")  # legend order
+      levels = c("1", "2", "3", "4", "5", "6") # legend order
     )
   ) %>%
   arrange(
-    n_habitat_associations %in% c("6","5","4"),   # FALSE (1–3) first, TRUE (4–6) last
-    n_habitat_associations                        # within those, 1<2<3<4<5<6
+    n_habitat_associations %in% c("6", "5", "4"), # FALSE (1–3) first, TRUE (4–6) last
+    n_habitat_associations # within those, 1<2<3<4<5<6
   )
 
 # check
-head(diff_draws_diff$n_habitat_associations)      # should start with "1"
-tail(diff_draws_diff$n_habitat_associations)      # should end with "6","5","4"
+head(diff_draws_diff$n_habitat_associations) # should start with "1"
+tail(diff_draws_diff$n_habitat_associations) # should end with "6","5","4"
 
 # summarize credible intervals for the difference
 summary <- diff_draws_diff %>%
   group_by(n_habitat_associations) %>%
-  summarize(mean.change = mean(diff),
-            lower = quantile(diff, 0.025),
-            upper = quantile(diff, 0.975))
+  summarize(
+    mean.change = mean(diff),
+    lower = quantile(diff, 0.025),
+    upper = quantile(diff, 0.975)
+  )
 
 #####################################
 ###                               ###
@@ -179,13 +188,15 @@ summary$Prob.greaterthan.0[6] <-
   mean(diff_draws_diff$diff[diff_draws_diff$n_habitat_associations == "6"] > 0)
 
 # Save summary
-write.csv(summary,
-          paste(path, "01_Analysis/IUCN Habitats/Posterior Dist_Hab Assoc Model_Full.csv",
-                sep = ""),
-          row.names = FALSE)
-
-
-
+write.csv(
+  summary,
+  paste(
+    path,
+    "01_Analysis/IUCN Habitats/Posterior Dist_Hab Assoc Model_Full.csv",
+    sep = ""
+  ),
+  row.names = FALSE
+)
 
 
 #####################################
@@ -201,39 +212,56 @@ write.csv(summary,
 # Posterior mass mostly above 0 for hab assoc = 4 means that relative abundance
 # was higher at t12 than at t1
 
-hab.plot <- ggplot(diff_draws_diff, aes(x = diff, fill = factor(n_habitat_associations),
-                                        colour = factor(n_habitat_associations))) +
+hab.plot <- ggplot(
+  diff_draws_diff,
+  aes(
+    x = diff,
+    fill = factor(n_habitat_associations),
+    colour = factor(n_habitat_associations)
+  )
+) +
   geom_density(aes(alpha = factor(n_habitat_associations))) +
   geom_vline(xintercept = 0, color = "black", linetype = "dashed") +
   scale_x_continuous(name = "% Change in expected relative abundance") +
   scale_y_continuous(name = "Density") +
-  scale_color_manual(name = "# of Habitat\n Associations",
-                     values = c("1" = "black",
-                                "2" = "black",
-                                "3" = "black",
-                                "4" = "black",
-                                "5" = "black",
-                                "6" = "black")) +
-  scale_fill_manual(name = "# of Habitat\n Associations",
-                    values = c("1" = viridis(6)[6],
-                               "2" = viridis(6)[5],
-                               "3" = viridis(6)[4],
-                               "4" = viridis(6)[3],
-                               "5" = viridis(6)[2],
-                               "6" = viridis(6)[1])) +
-  scale_alpha_manual(name = "# of Habitat\n Associations",
-                     values = c("1" = 0.3,
-                                "2" = 0.3,
-                                "3" = 0.3,
-                                "4" = 0.7,
-                                "5" = 0.7,
-                                "6" = 0.7)) +
+  scale_color_manual(
+    name = "# of Habitat\n Associations",
+    values = c(
+      "1" = "black",
+      "2" = "black",
+      "3" = "black",
+      "4" = "black",
+      "5" = "black",
+      "6" = "black"
+    )
+  ) +
+  scale_fill_manual(
+    name = "# of Habitat\n Associations",
+    values = c(
+      "1" = viridis(6)[6],
+      "2" = viridis(6)[5],
+      "3" = viridis(6)[4],
+      "4" = viridis(6)[3],
+      "5" = viridis(6)[2],
+      "6" = viridis(6)[1]
+    )
+  ) +
+  scale_alpha_manual(
+    name = "# of Habitat\n Associations",
+    values = c("1" = 0.3, "2" = 0.3, "3" = 0.3, "4" = 0.7, "5" = 0.7, "6" = 0.7)
+  ) +
   theme_bw() +
-  theme(axis.text.x = element_text(size=22)) +
-  theme(axis.text.y = element_text(size=22)) +
-  theme(axis.title.x = element_text(size=22, face="bold", color="gray30")) +
-  theme(axis.title.y = element_text(size=22, face="bold", color="gray30")) +
-  theme(legend.title = element_text(size = 18, face = "bold", color = "gray30")) +
+  theme(axis.text.x = element_text(size = 22)) +
+  theme(axis.text.y = element_text(size = 22)) +
+  theme(
+    axis.title.x = element_text(size = 22, face = "bold", color = "gray30")
+  ) +
+  theme(
+    axis.title.y = element_text(size = 22, face = "bold", color = "gray30")
+  ) +
+  theme(
+    legend.title = element_text(size = 18, face = "bold", color = "gray30")
+  ) +
   theme(legend.text = element_text(size = 16)) +
   theme(legend.position = "right")
 
@@ -245,9 +273,15 @@ hab.plot <- ggplot(diff_draws_diff, aes(x = diff, fill = factor(n_habitat_associ
 #        device = "jpeg",
 #        height = 7, width = 13, dpi = 300)
 
-ggsave(paste(path,
-             "03_Code/Code for Publishing/Manuscript Figures/Fig3_Overall t12-t1 habitat associations.jpg",
-             sep = ""),
-       hab.plot,
-       device = "jpeg",
-       height = 7, width = 13, dpi = 300)
+ggsave(
+  paste(
+    path,
+    "03_Code/Code for Publishing/Manuscript Figures/Fig3_Overall t12-t1 habitat associations.jpg",
+    sep = ""
+  ),
+  hab.plot,
+  device = "jpeg",
+  height = 7,
+  width = 13,
+  dpi = 300
+)

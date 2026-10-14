@@ -11,8 +11,8 @@
 # Beta = B
 
 # Clean workspace
-rm(list = ls() )
-gc() 
+rm(list = ls())
+gc()
 
 # Load required packages
 library(tidyverse)
@@ -28,8 +28,11 @@ path <- "~/share/groups/mas/01_projects/iUpdate/Beta Diversity with Pao_paper/03
 #####################################
 
 # Load the raw data
-data = read.csv(paste(path, 'pairs_beta_birds_environ_cookie_20250708.csv',
-                      sep = ""))
+data <- read.csv(paste(
+  path,
+  'pairs_beta_birds_environ_cookie_20250708.csv',
+  sep = ""
+))
 
 
 #####################################
@@ -39,14 +42,17 @@ data = read.csv(paste(path, 'pairs_beta_birds_environ_cookie_20250708.csv',
 #####################################
 
 # Load the model object that includes all spatial polygons
-load(paste(path, 'Model Results/Route Pairs/Model_mean_beta_q0.RData',
-           sep = ""))
+load(paste(
+  path,
+  'Model Results/Route Pairs/Model_mean_beta_q0.RData',
+  sep = ""
+))
 
 # Create a list of the models
 mod.list <- list(mod1, mod2, mod3, mod4)
 
 # Define cookies
-cookies = data$cookie
+cookies <- data$cookie
 
 # Beta: 3 dimensional array with 10000 rows
 # 2 columns (2 coefficients or parameters per row)
@@ -55,65 +61,87 @@ cookies = data$cookie
 # Make dataframe for all estimates
 all.estimates_q0 <- data.frame()
 
-for(j in 1:length(mod.list)) {
-  
+for (j in 1:length(mod.list)) {
   mod <- mod.list[[j]]
-  
+
   # Processing to extract model predictions
-  n = nrow(mod$beta[,2,])
-  m = ncol(mod$beta[,2,])
-  B = mod$eta[,2,]
-  A = mod$beta[,2,]
-  
-  df = data.frame()
+  n <- nrow(mod$beta[, 2, ])
+  m <- ncol(mod$beta[, 2, ])
+  B <- mod$eta[, 2, ]
+  A <- mod$beta[, 2, ]
+
+  df <- data.frame()
   for (i in 1:m) {
-    df = rbind(df, data.frame(A = A[,i],
-                              B = B[,i],
-                              Variable = paste0("Cookie", cookies[i]),
-                              Model = paste0("Mod", j)))
+    df <- rbind(
+      df,
+      data.frame(
+        A = A[, i],
+        B = B[, i],
+        Variable = paste0("Cookie", cookies[i]),
+        Model = paste0("Mod", j)
+      )
+    )
   }
-  
+
   # Bind results
   all.estimates_q0 <- rbind(all.estimates_q0, df)
-  
 }
 
 
 # Compute means and 95% CIs by cookie
-cookie.means = all.estimates_q0 %>%
+cookie.means <- all.estimates_q0 %>%
   group_by(Variable) %>%
-  summarise(mean_EH = mean(A),
-            EH_lower_CI = quantile(A, 0.025),
-            EH_upper_CI = quantile(A, 0.975),
-            mean_beta = mean(B),
-            beta_lower_CI = quantile(B, 0.025),
-            beta_upper_CI = quantile(B, 0.975),
-            .groups = "drop")
+  summarise(
+    mean_EH = mean(A),
+    EH_lower_CI = quantile(A, 0.025),
+    EH_upper_CI = quantile(A, 0.975),
+    mean_beta = mean(B),
+    beta_lower_CI = quantile(B, 0.025),
+    beta_upper_CI = quantile(B, 0.975),
+    .groups = "drop"
+  )
 
 # Compute means and 95% CIs across all cookies
-all.means = all.estimates_q0 %>%
-  summarise(mean_EH = mean(A),
-            EH_lower_CI = quantile(A, 0.025),
-            EH_upper_CI = quantile(A, 0.975),
-            mean_beta = mean(B),
-            beta_lower_CI = quantile(B, 0.025),
-            beta_upper_CI = quantile(B, 0.975),
-            .groups = "drop")
+all.means <- all.estimates_q0 %>%
+  summarise(
+    mean_EH = mean(A),
+    EH_lower_CI = quantile(A, 0.025),
+    EH_upper_CI = quantile(A, 0.975),
+    mean_beta = mean(B),
+    beta_lower_CI = quantile(B, 0.025),
+    beta_upper_CI = quantile(B, 0.975),
+    .groups = "drop"
+  )
 
 # Save the results
-write.csv(cookie.means,
-          "~/share/groups/mas/01_projects/iUpdate/Beta Diversity with Pao_paper/01_Analysis/Model_Results/q0_bycookie_Trend Means and CIs.csv",
-          row.names = FALSE)
+write.csv(
+  cookie.means,
+  "~/share/groups/mas/01_projects/iUpdate/Beta Diversity with Pao_paper/01_Analysis/Model_Results/q0_bycookie_Trend Means and CIs.csv",
+  row.names = FALSE
+)
 
 
-write.csv(all.means,
-          "~/share/groups/mas/01_projects/iUpdate/Beta Diversity with Pao_paper/01_Analysis/Model_Results/q0_Trend Means and CIs.csv",
-          row.names = FALSE)
+write.csv(
+  all.means,
+  "~/share/groups/mas/01_projects/iUpdate/Beta Diversity with Pao_paper/01_Analysis/Model_Results/q0_Trend Means and CIs.csv",
+  row.names = FALSE
+)
 
 # Clean up workspace
-rm(A, all.estimates_q0, all.means, B, cookie.means, df, mod, mod.list,
-   mod1, mod2, mod3, mod4)
-
+rm(
+  A,
+  all.estimates_q0,
+  all.means,
+  B,
+  cookie.means,
+  df,
+  mod,
+  mod.list,
+  mod1,
+  mod2,
+  mod3,
+  mod4
+)
 
 
 #####################################
@@ -123,14 +151,17 @@ rm(A, all.estimates_q0, all.means, B, cookie.means, df, mod, mod.list,
 #####################################
 
 # Load the model object that includes all spatial polygons
-load(paste(path, 'Model Results/Route Pairs/Model_mean_beta_q1.RData',
-           sep = ""))
+load(paste(
+  path,
+  'Model Results/Route Pairs/Model_mean_beta_q1.RData',
+  sep = ""
+))
 
 # Create a list of the models
 mod.list <- list(mod1, mod2, mod3, mod4)
 
 # Define cookies
-cookies = data$cookie
+cookies <- data$cookie
 
 # Beta: 3 dimensional array with 10000 rows
 # 2 columns (2 coefficients or parameters per row)
@@ -139,65 +170,87 @@ cookies = data$cookie
 # Make dataframe for all estimates
 all.estimates_q1 <- data.frame()
 
-for(j in 1:length(mod.list)) {
-  
+for (j in 1:length(mod.list)) {
   mod <- mod.list[[j]]
-  
+
   # Processing to extract model predictions
-  n = nrow(mod$beta[,2,])
-  m = ncol(mod$beta[,2,])
-  B = mod$eta[,2,]
-  A = mod$beta[,2,]
-  
-  df = data.frame()
+  n <- nrow(mod$beta[, 2, ])
+  m <- ncol(mod$beta[, 2, ])
+  B <- mod$eta[, 2, ]
+  A <- mod$beta[, 2, ]
+
+  df <- data.frame()
   for (i in 1:m) {
-    df = rbind(df, data.frame(A = A[,i],
-                              B = B[,i],
-                              Variable = paste0("Cookie", cookies[i]),
-                              Model = paste0("Mod", j)))
+    df <- rbind(
+      df,
+      data.frame(
+        A = A[, i],
+        B = B[, i],
+        Variable = paste0("Cookie", cookies[i]),
+        Model = paste0("Mod", j)
+      )
+    )
   }
-  
+
   # Bind results
   all.estimates_q1 <- rbind(all.estimates_q1, df)
-  
 }
 
 
 # Compute means and 95% CIs by cookie
-cookie.means = all.estimates_q1 %>%
+cookie.means <- all.estimates_q1 %>%
   group_by(Variable) %>%
-  summarise(mean_EH = mean(A),
-            EH_lower_CI = quantile(A, 0.025),
-            EH_upper_CI = quantile(A, 0.975),
-            mean_beta = mean(B),
-            beta_lower_CI = quantile(B, 0.025),
-            beta_upper_CI = quantile(B, 0.975),
-            .groups = "drop")
+  summarise(
+    mean_EH = mean(A),
+    EH_lower_CI = quantile(A, 0.025),
+    EH_upper_CI = quantile(A, 0.975),
+    mean_beta = mean(B),
+    beta_lower_CI = quantile(B, 0.025),
+    beta_upper_CI = quantile(B, 0.975),
+    .groups = "drop"
+  )
 
 # Compute means and 95% CIs across all cookies
-all.means = all.estimates_q1 %>%
-  summarise(mean_EH = mean(A),
-            EH_lower_CI = quantile(A, 0.025),
-            EH_upper_CI = quantile(A, 0.975),
-            mean_beta = mean(B),
-            beta_lower_CI = quantile(B, 0.025),
-            beta_upper_CI = quantile(B, 0.975),
-            .groups = "drop")
+all.means <- all.estimates_q1 %>%
+  summarise(
+    mean_EH = mean(A),
+    EH_lower_CI = quantile(A, 0.025),
+    EH_upper_CI = quantile(A, 0.975),
+    mean_beta = mean(B),
+    beta_lower_CI = quantile(B, 0.025),
+    beta_upper_CI = quantile(B, 0.975),
+    .groups = "drop"
+  )
 
 # Save the results
-write.csv(cookie.means,
-          "~/share/groups/mas/01_projects/iUpdate/Beta Diversity with Pao_paper/01_Analysis/Model_Results/q1_bycookie_Trend Means and CIs.csv",
-          row.names = FALSE)
+write.csv(
+  cookie.means,
+  "~/share/groups/mas/01_projects/iUpdate/Beta Diversity with Pao_paper/01_Analysis/Model_Results/q1_bycookie_Trend Means and CIs.csv",
+  row.names = FALSE
+)
 
 
-write.csv(all.means,
-          "~/share/groups/mas/01_projects/iUpdate/Beta Diversity with Pao_paper/01_Analysis/Model_Results/q1_Trend Means and CIs.csv",
-          row.names = FALSE)
+write.csv(
+  all.means,
+  "~/share/groups/mas/01_projects/iUpdate/Beta Diversity with Pao_paper/01_Analysis/Model_Results/q1_Trend Means and CIs.csv",
+  row.names = FALSE
+)
 
 # Clean up workspace
-rm(A, all.estimates_q1, all.means, B, cookie.means, df, mod, mod.list,
-   mod1, mod2, mod3, mod4)
-
+rm(
+  A,
+  all.estimates_q1,
+  all.means,
+  B,
+  cookie.means,
+  df,
+  mod,
+  mod.list,
+  mod1,
+  mod2,
+  mod3,
+  mod4
+)
 
 
 #####################################
@@ -207,14 +260,17 @@ rm(A, all.estimates_q1, all.means, B, cookie.means, df, mod, mod.list,
 #####################################
 
 # Load the model object that includes all spatial polygons
-load(paste(path, 'Model Results/Route Pairs/Model_mean_beta_q2.RData',
-           sep = ""))
+load(paste(
+  path,
+  'Model Results/Route Pairs/Model_mean_beta_q2.RData',
+  sep = ""
+))
 
 # Create a list of the models
 mod.list <- list(mod1, mod2, mod3, mod4)
 
 # Define cookies
-cookies = data$cookie
+cookies <- data$cookie
 
 # Beta: 3 dimensional array with 10000 rows
 # 2 columns (2 coefficients or parameters per row)
@@ -223,61 +279,84 @@ cookies = data$cookie
 # Make dataframe for all estimates
 all.estimates_q2 <- data.frame()
 
-for(j in 1:length(mod.list)) {
-  
+for (j in 1:length(mod.list)) {
   mod <- mod.list[[j]]
-  
+
   # Processing to extract model predictions
-  n = nrow(mod$beta[,2,])
-  m = ncol(mod$beta[,2,])
-  B = mod$eta[,2,]
-  A = mod$beta[,2,]
-  
-  df = data.frame()
+  n <- nrow(mod$beta[, 2, ])
+  m <- ncol(mod$beta[, 2, ])
+  B <- mod$eta[, 2, ]
+  A <- mod$beta[, 2, ]
+
+  df <- data.frame()
   for (i in 1:m) {
-    df = rbind(df, data.frame(A = A[,i],
-                              B = B[,i],
-                              Variable = paste0("Cookie", cookies[i]),
-                              Model = paste0("Mod", j)))
+    df <- rbind(
+      df,
+      data.frame(
+        A = A[, i],
+        B = B[, i],
+        Variable = paste0("Cookie", cookies[i]),
+        Model = paste0("Mod", j)
+      )
+    )
   }
-  
+
   # Bind results
   all.estimates_q2 <- rbind(all.estimates_q2, df)
-  
 }
 
 
 # Compute means and 95% CIs by cookie
-cookie.means = all.estimates_q2 %>%
+cookie.means <- all.estimates_q2 %>%
   group_by(Variable) %>%
-  summarise(mean_EH = mean(A),
-            EH_lower_CI = quantile(A, 0.025),
-            EH_upper_CI = quantile(A, 0.975),
-            mean_beta = mean(B),
-            beta_lower_CI = quantile(B, 0.025),
-            beta_upper_CI = quantile(B, 0.975),
-            .groups = "drop")
+  summarise(
+    mean_EH = mean(A),
+    EH_lower_CI = quantile(A, 0.025),
+    EH_upper_CI = quantile(A, 0.975),
+    mean_beta = mean(B),
+    beta_lower_CI = quantile(B, 0.025),
+    beta_upper_CI = quantile(B, 0.975),
+    .groups = "drop"
+  )
 
 # Compute means and 95% CIs across all cookies
-all.means = all.estimates_q2 %>%
-  summarise(mean_EH = mean(A),
-            EH_lower_CI = quantile(A, 0.025),
-            EH_upper_CI = quantile(A, 0.975),
-            mean_beta = mean(B),
-            beta_lower_CI = quantile(B, 0.025),
-            beta_upper_CI = quantile(B, 0.975),
-            .groups = "drop")
+all.means <- all.estimates_q2 %>%
+  summarise(
+    mean_EH = mean(A),
+    EH_lower_CI = quantile(A, 0.025),
+    EH_upper_CI = quantile(A, 0.975),
+    mean_beta = mean(B),
+    beta_lower_CI = quantile(B, 0.025),
+    beta_upper_CI = quantile(B, 0.975),
+    .groups = "drop"
+  )
 
 # Save the results
-write.csv(cookie.means,
-          "~/share/groups/mas/01_projects/iUpdate/Beta Diversity with Pao_paper/01_Analysis/Model_Results/q2_bycookie_Trend Means and CIs.csv",
-          row.names = FALSE)
+write.csv(
+  cookie.means,
+  "~/share/groups/mas/01_projects/iUpdate/Beta Diversity with Pao_paper/01_Analysis/Model_Results/q2_bycookie_Trend Means and CIs.csv",
+  row.names = FALSE
+)
 
 
-write.csv(all.means,
-          "~/share/groups/mas/01_projects/iUpdate/Beta Diversity with Pao_paper/01_Analysis/Model_Results/q2_Trend Means and CIs.csv",
-          row.names = FALSE)
+write.csv(
+  all.means,
+  "~/share/groups/mas/01_projects/iUpdate/Beta Diversity with Pao_paper/01_Analysis/Model_Results/q2_Trend Means and CIs.csv",
+  row.names = FALSE
+)
 
 # Clean up workspace
-rm(A, all.estimates_q2, all.means, B, cookie.means, df, mod, mod.list,
-   mod1, mod2, mod3, mod4)
+rm(
+  A,
+  all.estimates_q2,
+  all.means,
+  B,
+  cookie.means,
+  df,
+  mod,
+  mod.list,
+  mod1,
+  mod2,
+  mod3,
+  mod4
+)

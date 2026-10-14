@@ -1,16 +1,15 @@
 ################################################################################
 ########                                                                ########
-########        Resampling NLCD data to a broader extent                ######## 
+########        Resampling NLCD data to a broader extent                ########
 ########                                                                ########
 ################################################################################
 
-
 # This code converts/resamples land cover data for the conterminous USA from
-# the National Land Cover Database for 1985 - 2023 to match the extent and 
+# the National Land Cover Database for 1985 - 2023 to match the extent and
 # resolution of land cover
-# data in the CONUS backcasting (also from 
-# USGS and spanning 1938 - 1992). 
-# Resolution of the NLCD data is 30 meters. Resolution of the CONUS data is 
+# data in the CONUS backcasting (also from
+# USGS and spanning 1938 - 1992).
+# Resolution of the NLCD data is 30 meters. Resolution of the CONUS data is
 # 250 meters.
 # All rasters are in the same projection: Albers Conical Equal Area.
 
@@ -37,12 +36,10 @@
 # 90	Woody Wetlands
 # 95	Emergent Herbaceous Wetlands
 
-
-
 ########## clean workspace and load required packages ####################
 
 # clean workspace to improve efficiency: #
-rm(list = ls() ) 
+rm(list = ls())
 gc() #releases memory
 
 
@@ -60,8 +57,7 @@ library(terra)
 # Conus raster already projected to match the CRS of the NLCD rasters
 path <- "~/share/groups/mas/01_projects/iUpdate/Beta Diversity with Pao_paper/00_Data/processed/Land_cover/"
 
-conus <- terra :: rast(paste(path, "CONUS_Backcasting_proj_y1992.tif", sep = ""))
-
+conus <- terra::rast(paste(path, "CONUS_Backcasting_proj_y1992.tif", sep = ""))
 
 
 ###############################################
@@ -72,7 +68,7 @@ conus <- terra :: rast(paste(path, "CONUS_Backcasting_proj_y1992.tif", sep = "")
 
 lulc.path <- "~/share/groups/mas_data/00_data/original/NLCD_USA/"
 
-# list the land cover files 
+# list the land cover files
 lulc.files <- list.files(lulc.path, pattern = ".tif")
 
 
@@ -85,29 +81,27 @@ lulc.files <- list.files(lulc.path, pattern = ".tif")
 start.time <- Sys.time()
 
 for (i in 1:length(lulc.files)) {
-  
-  lc.rast <- terra :: rast(paste(lulc.path, lulc.files[i], sep = ""))
-  
+  lc.rast <- terra::rast(paste(lulc.path, lulc.files[i], sep = ""))
+
   # Extract the year
   year <- substr(lulc.files[i], 20, 23)
-  
-  # Resample with method near as it is the preferred method when values 
+
+  # Resample with method near as it is the preferred method when values
   # represent land cover classes
-  lc.rast <- terra :: resample(lc.rast, conus, method = "near")
-  
-  # Write the resampled raster as a tif file (so format matches the 
+  lc.rast <- terra::resample(lc.rast, conus, method = "near")
+
+  # Write the resampled raster as a tif file (so format matches the
   # Conus rasters)
   path2 <- "~/share/groups/mas_data/00_data/processed/NLCD_USA_250m/"
-  terra :: writeRaster(lc.rast,
-                       paste(path2, 
-                             paste("NLCD_", year, "_250m.tif", sep = ""),
-                             sep = ""))
+  terra::writeRaster(
+    lc.rast,
+    paste(path2, paste("NLCD_", year, "_250m.tif", sep = ""), sep = "")
+  )
   # Clean up workspace
   rm(lc.rast)
   gc()
-  
+
   print(i)
-  
 } # end of i loop
 
 end.time <- Sys.time()

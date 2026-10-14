@@ -5,12 +5,12 @@
 ################################################################################
 
 # This code converts the posterior mean and 95% credible intervals for the
-# trends in EH and the trends in beta diversity for q=0, q=1, and q=2 to 
+# trends in EH and the trends in beta diversity for q=0, q=1, and q=2 to
 # % change per time interval
 
 # Clean workspace
-rm(list = ls() )
-gc() 
+rm(list = ls())
+gc()
 
 # Load required packages
 library(tidyverse)
@@ -26,30 +26,48 @@ path <- "~/share/groups/mas/01_projects/iUpdate/Beta Diversity with Pao_paper/"
 #####################################
 
 # Load means and CIs by cookie and overall
-q0_all <- read.csv(paste(path, "01_Analysis/Model_Results/q0_Trend Means and CIs.csv",
-                         sep = ""),
-                   header = TRUE)
+q0_all <- read.csv(
+  paste(path, "01_Analysis/Model_Results/q0_Trend Means and CIs.csv", sep = ""),
+  header = TRUE
+)
 
-q1_all <- read.csv(paste(path, "01_Analysis/Model_Results/q1_Trend Means and CIs.csv",
-                         sep = ""),
-                   header = TRUE)
+q1_all <- read.csv(
+  paste(path, "01_Analysis/Model_Results/q1_Trend Means and CIs.csv", sep = ""),
+  header = TRUE
+)
 
-q2_all <- read.csv(paste(path, "01_Analysis/Model_Results/q2_Trend Means and CIs.csv",
-                         sep = ""),
-                   header = TRUE)
+q2_all <- read.csv(
+  paste(path, "01_Analysis/Model_Results/q2_Trend Means and CIs.csv", sep = ""),
+  header = TRUE
+)
 
 
-q0_cookie <- read.csv(paste(path, "01_Analysis/Model_Results/q0_bycookie_Trend Means and CIs.csv",
-                         sep = ""),
-                   header = TRUE)
+q0_cookie <- read.csv(
+  paste(
+    path,
+    "01_Analysis/Model_Results/q0_bycookie_Trend Means and CIs.csv",
+    sep = ""
+  ),
+  header = TRUE
+)
 
-q1_cookie <- read.csv(paste(path, "01_Analysis/Model_Results/q1_bycookie_Trend Means and CIs.csv",
-                         sep = ""),
-                   header = TRUE)
+q1_cookie <- read.csv(
+  paste(
+    path,
+    "01_Analysis/Model_Results/q1_bycookie_Trend Means and CIs.csv",
+    sep = ""
+  ),
+  header = TRUE
+)
 
-q2_cookie <- read.csv(paste(path, "01_Analysis/Model_Results/q2_bycookie_Trend Means and CIs.csv",
-                         sep = ""),
-                   header = TRUE)
+q2_cookie <- read.csv(
+  paste(
+    path,
+    "01_Analysis/Model_Results/q2_bycookie_Trend Means and CIs.csv",
+    sep = ""
+  ),
+  header = TRUE
+)
 
 
 #####################################
@@ -102,14 +120,22 @@ cookie_transformed <- bycookie %>%
 
 
 # Save the results
-write.csv(all_transformed,
-          paste(paste(path, "01_Analysis/Model_Results/Percent Change Mean and CI_all.csv",
-                      sep = "")),
-          row.names = FALSE)
+write.csv(
+  all_transformed,
+  paste(paste(
+    path,
+    "01_Analysis/Model_Results/Percent Change Mean and CI_all.csv",
+    sep = ""
+  )),
+  row.names = FALSE
+)
 
-write.csv(cookie_transformed,
-          paste(paste(path, "01_Analysis/Model_Results/Percent Change Mean and CI_bycookie.csv",
-                      sep = "")),
-          row.names = FALSE)
-
-          
+write.csv(
+  cookie_transformed,
+  paste(paste(
+    path,
+    "01_Analysis/Model_Results/Percent Change Mean and CI_bycookie.csv",
+    sep = ""
+  )),
+  row.names = FALSE
+)

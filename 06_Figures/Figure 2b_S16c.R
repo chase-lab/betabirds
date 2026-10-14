@@ -9,12 +9,11 @@
 # heterogeneity.
 
 # Figure 2b
-# Supplemental Figure 
-
+# Supplemental Figure
 
 # Clean workspace
-rm(list = ls() )
-gc() 
+rm(list = ls())
+gc()
 
 # Load required packages
 library(tidyverse)
@@ -34,12 +33,18 @@ path <- "~/share/groups/mas/01_projects/iUpdate/Beta Diversity with Pao_paper/03
 #####################################
 
 # Load the raw data
-data = read.csv(paste(path, 'pairs_beta_birds_environ_cookie_20250708.csv',
-                      sep = ""))
+data <- read.csv(paste(
+  path,
+  'pairs_beta_birds_environ_cookie_20250708.csv',
+  sep = ""
+))
 
 # Load the model object that includes all spatial polygons
-load(paste(path, 'Model Results/Route Pairs/Model_mean_beta_q1.RData',
-           sep = ""))
+load(paste(
+  path,
+  'Model Results/Route Pairs/Model_mean_beta_q1.RData',
+  sep = ""
+))
 
 
 #####################################
@@ -49,35 +54,35 @@ load(paste(path, 'Model Results/Route Pairs/Model_mean_beta_q1.RData',
 #####################################
 
 # Define the results to plot from
-mod = mod1
+mod <- mod1
 rm(mod1, mod2, mod3, mod4)
 
 # Beta: 3 dimensional array with 10000 rows
 # 2 columns (2 coefficients or parameters per row)
 # 74 layers (1 per cookie)
 
+cookies <- data$cookie
+year <- data$year_val
 
-cookies = data$cookie
-year = data$year_val
-
-y = data$mean_beta_1
-x = data$mean_beta_shannon_9_env
+y <- data$mean_beta_1
+x <- data$mean_beta_shannon_9_env
 
 # Processing for plotting from model object
-n = nrow(mod$beta[,2,])
-m = ncol(mod$beta[,2,])
-B = mod$eta[,2,]
-A = mod$beta[,2,]
+n <- nrow(mod$beta[, 2, ])
+m <- ncol(mod$beta[, 2, ])
+B <- mod$eta[, 2, ]
+A <- mod$beta[, 2, ]
 
-df = data.frame()
+df <- data.frame()
 for (i in 1:m) {
-  df = rbind(df, data.frame(A = A[,i],
-                            B = B[,i],
-                            Variable = paste0("Cookie", cookies[i])))
+  df <- rbind(
+    df,
+    data.frame(A = A[, i], B = B[, i], Variable = paste0("Cookie", cookies[i]))
+  )
 }
 
 # Compute means
-means = df %>%
+means <- df %>%
   group_by(Variable) %>%
   summarise(mean_A = mean(A), mean_B = mean(B), .groups = "drop")
 
@@ -94,53 +99,84 @@ means = df %>%
 ###              ###
 ####################
 
-p0 = ggplot(df, aes(x = A, y = B, color = Variable)) + 
-  geom_point(data = means, aes(x = mean_A, y = mean_B, color = Variable),
-             size = 3, shape = 16, col=1, alpha = 0.5) +
+p0 <- ggplot(df, aes(x = A, y = B, color = Variable)) +
+  geom_point(
+    data = means,
+    aes(x = mean_A, y = mean_B, color = Variable),
+    size = 3,
+    shape = 16,
+    col = 1,
+    alpha = 0.5
+  ) +
   theme_minimal() +
-  geom_abline(slope = mean(mod$phi[,2]), intercept = mean(mod$phi[,1]),
-              color = "#EEBC4D", lwd = 1.8) + # previously "darkorchid4" and "#1F2933"
-  geom_abline(slope = quantile(mod$phi[,2],0.95), 
-              intercept = quantile(mean(mod$phi[,1]), 0.95),
-              linetype = "dashed", color = "#EEBC4D", lwd=1.5) +
-  geom_abline(slope = quantile(mod$phi[,2],0.05),
-              intercept = quantile(mean(mod$phi[,1]), 0.05),
-              linetype = "dashed", color = "#EEBC4D",lwd=1.5) +
-  geom_hline(yintercept = 0,lwd=0.8) + geom_vline(xintercept = 0,lwd=0.8) +
-  scale_x_continuous("% change in environmental heterogeneity \nper time interval",
-                     limits = c(-0.0375, 0.0375), # originally 0.051
-                     breaks = c(-0.025, 0, 0.025), # originally up to 0.05
-                     labels = c("-5.6", "0.0", "5.9")) + # originally up to 12.2
+  geom_abline(
+    slope = mean(mod$phi[, 2]),
+    intercept = mean(mod$phi[, 1]),
+    color = "#EEBC4D",
+    lwd = 1.8
+  ) + # previously "darkorchid4" and "#1F2933"
+  geom_abline(
+    slope = quantile(mod$phi[, 2], 0.95),
+    intercept = quantile(mean(mod$phi[, 1]), 0.95),
+    linetype = "dashed",
+    color = "#EEBC4D",
+    lwd = 1.5
+  ) +
+  geom_abline(
+    slope = quantile(mod$phi[, 2], 0.05),
+    intercept = quantile(mean(mod$phi[, 1]), 0.05),
+    linetype = "dashed",
+    color = "#EEBC4D",
+    lwd = 1.5
+  ) +
+  geom_hline(yintercept = 0, lwd = 0.8) +
+  geom_vline(xintercept = 0, lwd = 0.8) +
+  scale_x_continuous(
+    "% change in environmental heterogeneity \nper time interval",
+    limits = c(-0.0375, 0.0375), # originally 0.051
+    breaks = c(-0.025, 0, 0.025), # originally up to 0.05
+    labels = c("-5.6", "0.0", "5.9")
+  ) + # originally up to 12.2
   scale_y_continuous(
     # name = expression(atop("% Change in " * beta [q==1] * " per ",
     #                        "time interval")),
-    name = expression(atop("% change in " * beta * " -diversity ",
-                           "per time interval")),
+    name = expression(atop(
+      "% change in " * beta * " -diversity ",
+      "per time interval"
+    )),
     limits = c(-0.02, 0.02),
     breaks = c(-0.02, 0.00, 0.02),
-    labels = c("-4.5", "0.0", "4.7")) +
-  theme(legend.position = 'none',
-        text=element_text(size=18),
-        axis.title.x = element_text(size = 22, color = "black"),
-        axis.text.x = element_text(size = 20, color = "black"),
-        axis.title.y = element_text(size = 22, face = "bold", color = "black"),
-        axis.text.y = element_text(size = 20,  color = "black")) 
+    labels = c("-4.5", "0.0", "4.7")
+  ) +
+  theme(
+    legend.position = 'none',
+    text = element_text(size = 18),
+    axis.title.x = element_text(size = 22, color = "black"),
+    axis.text.x = element_text(size = 20, color = "black"),
+    axis.title.y = element_text(size = 22, face = "bold", color = "black"),
+    axis.text.y = element_text(size = 20, color = "black")
+  )
 
-p0 = ggMarginal(p0, type="density", size=5, lwd=1)
+p0 <- ggMarginal(p0, type = "density", size = 5, lwd = 1)
 
 # Save plot
-ggsave(paste(path, "Manuscript Figures/Fig2b_q1_pairs.jpg",
-             sep = ""),
-       p0,
-       device = "jpeg", 
-       height = 7, width = 9, dpi = 300)
+ggsave(
+  paste(path, "Manuscript Figures/Fig2b_q1_pairs.jpg", sep = ""),
+  p0,
+  device = "jpeg",
+  height = 7,
+  width = 9,
+  dpi = 300
+)
 
-ggsave(paste(path, "Manuscript Figures/Fig2b_q1_pairs.pdf",
-             sep = ""),
-       p0,
-       device = "pdf", 
-       height = 7, width = 9, dpi = 300)
-
+ggsave(
+  paste(path, "Manuscript Figures/Fig2b_q1_pairs.pdf", sep = ""),
+  p0,
+  device = "pdf",
+  height = 7,
+  width = 9,
+  dpi = 300
+)
 
 
 ####################
@@ -149,60 +185,108 @@ ggsave(paste(path, "Manuscript Figures/Fig2b_q1_pairs.pdf",
 ###              ###
 ####################
 
-p = ggplot(df, aes(x = A, y = B, color = Variable)) + 
-  stat_ellipse(aes(fill = Variable), type = "norm", level = 0.95,
-               geom = "polygon", alpha = 0.15, color = NA) +
-  geom_point(data = means, aes(x = mean_A, y = mean_B, color = Variable),
-             size = 3, shape = 16, col=1, alpha = 0.5) +
+p <- ggplot(df, aes(x = A, y = B, color = Variable)) +
+  stat_ellipse(
+    aes(fill = Variable),
+    type = "norm",
+    level = 0.95,
+    geom = "polygon",
+    alpha = 0.15,
+    color = NA
+  ) +
+  geom_point(
+    data = means,
+    aes(x = mean_A, y = mean_B, color = Variable),
+    size = 3,
+    shape = 16,
+    col = 1,
+    alpha = 0.5
+  ) +
   theme_minimal() +
   # geom_abline(slope = 1, intercept = 0, color = "red", lwd = 0.5, alpha = 0.3) +
-  geom_abline(slope = mean(mod$phi[,2]), intercept = mean(mod$phi[,1]),
-              color = "darkorchid4", lwd = 1.5) + # previously "#1F2933"
-  geom_abline(slope = quantile(mod$phi[,2],0.95), 
-              intercept = quantile(mean(mod$phi[,1]), 0.95),
-              linetype = "dashed", color = "darkorchid4", lwd=1.2) +
-  geom_abline(slope = quantile(mod$phi[,2],0.05),
-              intercept = quantile(mean(mod$phi[,1]), 0.05),
-              linetype = "dashed", color = "darkorchid4",lwd=1.2) +
-  geom_hline(yintercept = 0,lwd=0.8) + geom_vline(xintercept = 0,lwd=0.8) +
-  scale_x_continuous("% Change in environmental heterogeneity per \ntime interval",
-                     limits = c(-0.0375, 0.0375), # originally 0.051
-                     breaks = c(-0.025, 0, 0.025), # originally up to 0.05
-                     labels = c("-5.6", "0.0", "5.9")) + # originally up to 12.2
+  geom_abline(
+    slope = mean(mod$phi[, 2]),
+    intercept = mean(mod$phi[, 1]),
+    color = "darkorchid4",
+    lwd = 1.5
+  ) + # previously "#1F2933"
+  geom_abline(
+    slope = quantile(mod$phi[, 2], 0.95),
+    intercept = quantile(mean(mod$phi[, 1]), 0.95),
+    linetype = "dashed",
+    color = "darkorchid4",
+    lwd = 1.2
+  ) +
+  geom_abline(
+    slope = quantile(mod$phi[, 2], 0.05),
+    intercept = quantile(mean(mod$phi[, 1]), 0.05),
+    linetype = "dashed",
+    color = "darkorchid4",
+    lwd = 1.2
+  ) +
+  geom_hline(yintercept = 0, lwd = 0.8) +
+  geom_vline(xintercept = 0, lwd = 0.8) +
+  scale_x_continuous(
+    "% Change in environmental heterogeneity per \ntime interval",
+    limits = c(-0.0375, 0.0375), # originally 0.051
+    breaks = c(-0.025, 0, 0.025), # originally up to 0.05
+    labels = c("-5.6", "0.0", "5.9")
+  ) + # originally up to 12.2
   scale_y_continuous(
-    name = expression(atop("% Change in " * beta [q==1] * " per ",
-                           "time interval")),
+    name = expression(atop(
+      "% Change in " * beta[q == 1] * " per ",
+      "time interval"
+    )),
     limits = c(-0.02, 0.02),
     breaks = c(-0.02, 0.00, 0.02),
-    labels = c("-4.5", "0.0", "4.7")) +
+    labels = c("-4.5", "0.0", "4.7")
+  ) +
   # Polygon (outlier) 5004
-  geom_point(data = means[41,], 
-             aes(x = mean_A, y = mean_B), size = 4, shape = 24, col='black',
-             fill="orange", alpha = 0.7) +
+  geom_point(
+    data = means[41, ],
+    aes(x = mean_A, y = mean_B),
+    size = 4,
+    shape = 24,
+    col = 'black',
+    fill = "orange",
+    alpha = 0.7
+  ) +
   # Polygon (outlier) 5013
-  geom_point(data = means[44,], 
-             aes(x = mean_A, y = mean_B), size = 4, shape = 24, col='black',
-             fill="orange", alpha = 0.7) +
-  theme(legend.position = 'none',
-        text=element_text(size=18),
-        axis.title.x = element_text(size = 22, color = "black"),
-        axis.text.x = element_text(size = 20, color = "black"),
-        axis.title.y = element_text(size = 22, face = "bold", color = "black"),
-        axis.text.y = element_text(size = 20,  color = "black")) 
+  geom_point(
+    data = means[44, ],
+    aes(x = mean_A, y = mean_B),
+    size = 4,
+    shape = 24,
+    col = 'black',
+    fill = "orange",
+    alpha = 0.7
+  ) +
+  theme(
+    legend.position = 'none',
+    text = element_text(size = 18),
+    axis.title.x = element_text(size = 22, color = "black"),
+    axis.text.x = element_text(size = 20, color = "black"),
+    axis.title.y = element_text(size = 22, face = "bold", color = "black"),
+    axis.text.y = element_text(size = 20, color = "black")
+  )
 
-p = ggMarginal(p, type="density", size=5, lwd=1)
+p <- ggMarginal(p, type = "density", size = 5, lwd = 1)
 
 # Save plot
-ggsave(paste(path, "Manuscript Figures/FigS__q1_pairs.jpg",
-             sep = ""),
-       p,
-       device = "jpeg", 
-       height = 7, width = 9, dpi = 300)
+ggsave(
+  paste(path, "Manuscript Figures/FigS__q1_pairs.jpg", sep = ""),
+  p,
+  device = "jpeg",
+  height = 7,
+  width = 9,
+  dpi = 300
+)
 
-ggsave(paste(path, "Manuscript Figures/FigS__q1_pairs.pdf",
-             sep = ""),
-       p,
-       device = "pdf", 
-       height = 7, width = 9, dpi = 300)
-
-
+ggsave(
+  paste(path, "Manuscript Figures/FigS__q1_pairs.pdf", sep = ""),
+  p,
+  device = "pdf",
+  height = 7,
+  width = 9,
+  dpi = 300
+)

@@ -1,6 +1,6 @@
 ################################################################################
 ########                                                                ########
-########    Evaluating classification consistency between NLCD data     ######## 
+########    Evaluating classification consistency between NLCD data     ########
 ########             and CONUS backcasted data with graphs              ########
 ################################################################################
 
@@ -8,7 +8,6 @@
 # First for 1000 random points drawn for each cover class across the entire
 # contiguous US.
 # Second for 1000 random points drawn from each cookie/polygon.
-
 
 # Notes on the metrics:
 
@@ -20,24 +19,24 @@
 
 # Accuracy lower and upper: 95% confidence interval bounds
 
-# Cohen's kappa : Measures agreement between conus and nlcd, adjusting for 
+# Cohen's kappa : Measures agreement between conus and nlcd, adjusting for
 #                 chance agreement
-#                formula = (observed accuracy - expected accuracy) / 
+#                formula = (observed accuracy - expected accuracy) /
 #                          (1 - expected accuracy)
 #                Interpretation: <0, less agreement than random chance
 #                                0-0.2: Slight agreement
-#                                0.2 - 0.4: Fair agreement 
+#                                0.2 - 0.4: Fair agreement
 #                                0.4-0.6: Moderate agreement
 #                                0.6 - 0.8: Substantial agreement
 #                                0.8-1: Almost perfect agreement
 #                More robust than accuracy for imbalanced classes
 
-# Accuracy Null: the accuracy achievable by always predicting the most 
+# Accuracy Null: the accuracy achievable by always predicting the most
 #                frequent class in the reference data (NLCD)
-#                e.g. if the most common class is agriculture at 80% then 
+#                e.g. if the most common class is agriculture at 80% then
 #                accuracy null = 0.8
 #                Use as a baseline to compare against your observed accuracy
-#                If your accuracy is 0.7 and accuracy null is 0.4, the 
+#                If your accuracy is 0.7 and accuracy null is 0.4, the
 #                harmonizaton adds value
 
 # Accuracy pvalue: pvalue for a one-sided test comparing the observed accuracy
@@ -45,13 +44,12 @@
 #                  p < 0.05: observed accuracy is significantly better than just
 #                  guessing the most common class
 
-
 ### By Class results ###
 
-# Sensitivity: Proportion of actual pixels of a class that were correctly 
+# Sensitivity: Proportion of actual pixels of a class that were correctly
 #              identified as that class (true positive rate)
 #              formula = true positives / (true positives + false negative)
-#              High specificity means most of the reference pixels were 
+#              High specificity means most of the reference pixels were
 #              captured by Conus.
 
 # Specificity: Proportion of pixels not belonging to a class that were
@@ -67,7 +65,7 @@
 #                 High precision means most predicted "forest" pixels really
 #                 are "forest".
 
-# Neg.Pred.Value: Proportion of pixels not predicted as a class by conus that 
+# Neg.Pred.Value: Proportion of pixels not predicted as a class by conus that
 #                 are not that class in nlcd.
 #                 formula = true negatives / (true negatives + false negatives)
 #                 High value means few actual pixels were missed by conus.
@@ -81,7 +79,7 @@
 #     Balances false positives and false negatives, high F1 means both
 #     precision and recall are high
 
-# Prevalence: Proportion of all reference pixels (NLCD) that belong to this 
+# Prevalence: Proportion of all reference pixels (NLCD) that belong to this
 #             class
 #             shows how common each class is in the reference data
 
@@ -89,7 +87,7 @@
 #                 are this class
 #                 formula = true positives / total pixels
 
-# Detection prevalence: Proportion of all pixels predicted by conus to be this 
+# Detection prevalence: Proportion of all pixels predicted by conus to be this
 #                       class, regardless of correctness
 #                       Show how often conus assigns this class label
 
@@ -99,15 +97,14 @@
 #                    positives and true negatives are well captured.
 
 # Example result - I can adjust as necessary
-# "CONUS and NLCD show substantial agreement (κ = 0.65), with 78% of pixels 
-#  matching. However, systematic biases exist (McNemar’s p = 0.02), likely due 
+# "CONUS and NLCD show substantial agreement (κ = 0.65), with 78% of pixels
+#  matching. However, systematic biases exist (McNemar’s p = 0.02), likely due
 #  to CONUS underestimating urban areas."
-
 
 ########## clean workspace and load required packages ####################
 
 # clean workspace to improve efficiency: #
-rm(list = ls() ) 
+rm(list = ls())
 gc() #releases memory
 
 
@@ -127,26 +124,52 @@ library(forcats)
 
 # Entire contiguous USA
 # Read in the overall results and the results by cover class
-setwd("~/share/groups/mas/01_projects/iUpdate/Beta Diversity with Pao_paper/01_Analysis/Land Cover/1st Crossvalidation")
+setwd(
+  "~/share/groups/mas/01_projects/iUpdate/Beta Diversity with Pao_paper/01_Analysis/Land Cover/1st Crossvalidation"
+)
 overall <- read.csv("Overall agreement of Conus to NLCD.csv", header = TRUE)
 by.class <- read.csv("By Class agreement of Conus to NLCD.csv", header = TRUE)
-misclass.usa <- read.csv("Misclassification by class and year_USA.csv", header = TRUE)
+misclass.usa <- read.csv(
+  "Misclassification by class and year_USA.csv",
+  header = TRUE
+)
 
 # Cookies only
-setwd("~/share/groups/mas/01_projects/iUpdate/Beta Diversity with Pao_paper/01_Analysis/Land Cover/1st Crossvalidation/Cookie Crossvalidation")
-overall.cookie <- read.csv("Overall agreement of Conus to NLCD.csv", header = TRUE)
-by.class.cookie <- read.csv("By Class agreement of Conus to NLCD.csv", header = TRUE)
-overall.by.polygon <- read.csv("Overall by polygon agreement of Conus to NLCD.csv", header = TRUE)
-class.by.polygon <- read.csv("By Class by polygon agreement of Conus to NLCD.csv", header = TRUE)
-misclass.cookie <- read.csv("Misclassification by class, cookie, and year.csv", header = TRUE)
+setwd(
+  "~/share/groups/mas/01_projects/iUpdate/Beta Diversity with Pao_paper/01_Analysis/Land Cover/1st Crossvalidation/Cookie Crossvalidation"
+)
+overall.cookie <- read.csv(
+  "Overall agreement of Conus to NLCD.csv",
+  header = TRUE
+)
+by.class.cookie <- read.csv(
+  "By Class agreement of Conus to NLCD.csv",
+  header = TRUE
+)
+overall.by.polygon <- read.csv(
+  "Overall by polygon agreement of Conus to NLCD.csv",
+  header = TRUE
+)
+class.by.polygon <- read.csv(
+  "By Class by polygon agreement of Conus to NLCD.csv",
+  header = TRUE
+)
+misclass.cookie <- read.csv(
+  "Misclassification by class, cookie, and year.csv",
+  header = TRUE
+)
 
 # Load the shapefile of the cookies
-setwd("~/share/groups/mas/01_projects/iUpdate/Beta Diversity with Pao_paper/00_Data/processed/BBS/Sample_1973to2021_by4/Cookies")
-cookies <- sf :: st_read("cookies_routes_assembled_20252305.shp")
+setwd(
+  "~/share/groups/mas/01_projects/iUpdate/Beta Diversity with Pao_paper/00_Data/processed/BBS/Sample_1973to2021_by4/Cookies"
+)
+cookies <- sf::st_read("cookies_routes_assembled_20252305.shp")
 
 # Load the USA shapefile
-setwd("~/share/groups/mas/01_projects/iUpdate/Beta Diversity with Pao_paper/00_Data/raw")
-usa.shape <- sf :: st_read("USACANAB.shp")
+setwd(
+  "~/share/groups/mas/01_projects/iUpdate/Beta Diversity with Pao_paper/00_Data/raw"
+)
+usa.shape <- sf::st_read("USACANAB.shp")
 
 ###############################################
 ###                                         ###
@@ -154,37 +177,52 @@ usa.shape <- sf :: st_read("USACANAB.shp")
 ###                                         ###
 ###############################################
 
-overall.wide <- pivot_wider(overall, names_from = Metric,
-                            values_from = Conus.match.to.NLCD)
+overall.wide <- pivot_wider(
+  overall,
+  names_from = Metric,
+  values_from = Conus.match.to.NLCD
+)
 
 # Remove the beginning text from the class column
 by.class$Class <- gsub(pattern = "Class: ", "", by.class$Class)
 
 
-overall.cookie.wide <- pivot_wider(overall.cookie, names_from = Metric,
-                            values_from = Conus.match.to.NLCD)
+overall.cookie.wide <- pivot_wider(
+  overall.cookie,
+  names_from = Metric,
+  values_from = Conus.match.to.NLCD
+)
 
 # Remove the beginning text from the class column
 by.class.cookie$Class <- gsub(pattern = "Class: ", "", by.class.cookie$Class)
 
 # Define the coordinate system
-albers = sp :: CRS(SRS_string = "EPSG:5070")
+albers <- sp::CRS(SRS_string = "EPSG:5070")
 
 # Set CRS of USA
-usa.shape <- sf :: st_set_crs( usa.shape, albers )
+usa.shape <- sf::st_set_crs(usa.shape, albers)
 
 # Crop to USA
-usa.shape <- usa.shape[usa.shape$STATE != "AK" & usa.shape$STATE != "NWT" &
-                          usa.shape$STATE != "YT" & usa.shape$STATE != "BC" &
-                          usa.shape$STATE != "QUE" & usa.shape$STATE != "LAB" &
-                          usa.shape$STATE != "SAS" & usa.shape$STATE != "xx" &
-                          usa.shape$STATE != "MAN" & usa.shape$STATE != "NFD" &
-                          usa.shape$STATE != "ONT" & usa.shape$STATE != "NS" &
-                          usa.shape$STATE != "NB" & usa.shape$STATE != "PEI" &
-                          usa.shape$STATE != "ALB", ]
+usa.shape <- usa.shape[
+  usa.shape$STATE != "AK" &
+    usa.shape$STATE != "NWT" &
+    usa.shape$STATE != "YT" &
+    usa.shape$STATE != "BC" &
+    usa.shape$STATE != "QUE" &
+    usa.shape$STATE != "LAB" &
+    usa.shape$STATE != "SAS" &
+    usa.shape$STATE != "xx" &
+    usa.shape$STATE != "MAN" &
+    usa.shape$STATE != "NFD" &
+    usa.shape$STATE != "ONT" &
+    usa.shape$STATE != "NS" &
+    usa.shape$STATE != "NB" &
+    usa.shape$STATE != "PEI" &
+    usa.shape$STATE != "ALB",
+]
 
 # Set CRS of cookies
-cookies <- sf :: st_set_crs( cookies, albers )
+cookies <- sf::st_set_crs(cookies, albers)
 
 
 ###############################################
@@ -196,22 +234,27 @@ cookies <- sf :: st_set_crs( cookies, albers )
 summary.overall_usa <- overall %>%
   filter(Metric %in% c("Accuracy", "Kappa")) %>%
   group_by(Metric) %>%
-  summarize(mean = mean(Conus.match.to.NLCD),
-            min = min(Conus.match.to.NLCD),
-            max = max(Conus.match.to.NLCD))
+  summarize(
+    mean = mean(Conus.match.to.NLCD),
+    min = min(Conus.match.to.NLCD),
+    max = max(Conus.match.to.NLCD)
+  )
 
 summary.overall_cookies <- overall.by.polygon %>%
   filter(Metric %in% c("Accuracy", "Kappa")) %>%
   group_by(Metric) %>%
-  summarize(mean = mean(Value),
-            min = min(Value),
-            max = max(Value))
+  summarize(mean = mean(Value), min = min(Value), max = max(Value))
 
 # Save dataframes
-setwd("~/share/groups/mas/01_projects/iUpdate/Beta Diversity with Pao_paper/01_Analysis/Land Cover/1st Crossvalidation")
+setwd(
+  "~/share/groups/mas/01_projects/iUpdate/Beta Diversity with Pao_paper/01_Analysis/Land Cover/1st Crossvalidation"
+)
 write.csv(summary.overall_usa, "Summary stats_USA.csv", row.names = FALSE)
-write.csv(summary.overall_cookies, "Summary stats_cookies.csv", row.names = FALSE)
-
+write.csv(
+  summary.overall_cookies,
+  "Summary stats_cookies.csv",
+  row.names = FALSE
+)
 
 
 ###############################################
@@ -226,57 +269,150 @@ x_max <- max(overall$Year)
 x_center <- (x_min + x_max) / 2
 
 # Overall accuracy and Kappa
-overall.plot <- ggplot(data = overall, aes(x = Year, y = Value, color = Metric)) +
-  annotate("rect", xmin = x_min, xmax = x_max, 
-           ymin = 0.0, ymax = 0.2, alpha = 0.6, fill = turbo(100)[81]) +
-  annotate("rect", xmin = x_min, xmax = x_max, 
-           ymin = 0.2, ymax = 0.4, alpha = 0.6, fill = turbo(100)[61]) +
-  annotate("rect", xmin = x_min, xmax = x_max,
-           ymin = 0.4, ymax = 0.6, alpha = 0.6, fill = turbo(100)[41]) +
-  annotate("rect", xmin = x_min, xmax = x_max,
-           ymin = 0.6, ymax = 0.8, alpha = 0.6, fill = turbo(100)[21]) +
-  annotate("rect", xmin = x_min, xmax = x_max,
-           ymin = 0.8, ymax = 1.0, alpha = 0.4, fill = turbo(100)[1]) +
-  annotate("text", x = x_center,
-           y = 0.05, label = "Slight Agreement", fontface = "italic", size = 5) +
-  annotate("text", x = x_center,
-           y = 0.25, label = "Fair Agreement", fontface = "italic", size = 5) +
-  annotate("text", x = x_center,
-           y = 0.45, label = "Moderate Agreement", fontface = "italic", size = 5) +
-  annotate("text", x = x_center,
-           y = 0.65, label = "Substantial Agreement", fontface = "italic", size = 5) +
-  annotate("text", x = x_center,
-           y = 0.85, label = "Almost Perfect Agreement", fontface = "italic", size = 5) +
+overall.plot <- ggplot(
+  data = overall,
+  aes(x = Year, y = Value, color = Metric)
+) +
+  annotate(
+    "rect",
+    xmin = x_min,
+    xmax = x_max,
+    ymin = 0.0,
+    ymax = 0.2,
+    alpha = 0.6,
+    fill = turbo(100)[81]
+  ) +
+  annotate(
+    "rect",
+    xmin = x_min,
+    xmax = x_max,
+    ymin = 0.2,
+    ymax = 0.4,
+    alpha = 0.6,
+    fill = turbo(100)[61]
+  ) +
+  annotate(
+    "rect",
+    xmin = x_min,
+    xmax = x_max,
+    ymin = 0.4,
+    ymax = 0.6,
+    alpha = 0.6,
+    fill = turbo(100)[41]
+  ) +
+  annotate(
+    "rect",
+    xmin = x_min,
+    xmax = x_max,
+    ymin = 0.6,
+    ymax = 0.8,
+    alpha = 0.6,
+    fill = turbo(100)[21]
+  ) +
+  annotate(
+    "rect",
+    xmin = x_min,
+    xmax = x_max,
+    ymin = 0.8,
+    ymax = 1.0,
+    alpha = 0.4,
+    fill = turbo(100)[1]
+  ) +
+  annotate(
+    "text",
+    x = x_center,
+    y = 0.05,
+    label = "Slight Agreement",
+    fontface = "italic",
+    size = 5
+  ) +
+  annotate(
+    "text",
+    x = x_center,
+    y = 0.25,
+    label = "Fair Agreement",
+    fontface = "italic",
+    size = 5
+  ) +
+  annotate(
+    "text",
+    x = x_center,
+    y = 0.45,
+    label = "Moderate Agreement",
+    fontface = "italic",
+    size = 5
+  ) +
+  annotate(
+    "text",
+    x = x_center,
+    y = 0.65,
+    label = "Substantial Agreement",
+    fontface = "italic",
+    size = 5
+  ) +
+  annotate(
+    "text",
+    x = x_center,
+    y = 0.85,
+    label = "Almost Perfect Agreement",
+    fontface = "italic",
+    size = 5
+  ) +
   # Add dashed horizontal lines
-  geom_hline(yintercept = c(0.2, 0.4, 0.6, 0.8),
-             linetype = "dashed", color = "black") +
+  geom_hline(
+    yintercept = c(0.2, 0.4, 0.6, 0.8),
+    linetype = "dashed",
+    color = "black"
+  ) +
   geom_errorbar(
-    data = overall.wide, 
-    aes(x = Year, y = Accuracy, ymin = AccuracyLower, ymax = AccuracyUpper,
-        color = "Accuracy"), 
-    width = 0.2, inherit.aes = FALSE) +
-  geom_point(data = overall.wide, aes(x = Year, y = Accuracy,
-                                      color = "Accuracy"),
-             size = 2) +
-  geom_point(data = overall.wide, aes(x = Year, y = Kappa,
-                                      color = "Kappa"),
-             size = 2) +
+    data = overall.wide,
+    aes(
+      x = Year,
+      y = Accuracy,
+      ymin = AccuracyLower,
+      ymax = AccuracyUpper,
+      color = "Accuracy"
+    ),
+    width = 0.2,
+    inherit.aes = FALSE
+  ) +
+  geom_point(
+    data = overall.wide,
+    aes(x = Year, y = Accuracy, color = "Accuracy"),
+    size = 2
+  ) +
+  geom_point(
+    data = overall.wide,
+    aes(x = Year, y = Kappa, color = "Kappa"),
+    size = 2
+  ) +
   scale_color_manual(
     values = c("Accuracy" = "black", "Kappa" = "red"),
-    labels = c("Overall Accuracy", "Cohen's Kappa")) +
-  scale_y_continuous(name = "Accuracy", lim = c(0, 1.0),
-                     breaks = c(0, 0.2, 0.4, 0.6, 0.8, 1)) +
+    labels = c("Overall Accuracy", "Cohen's Kappa")
+  ) +
+  scale_y_continuous(
+    name = "Accuracy",
+    lim = c(0, 1.0),
+    breaks = c(0, 0.2, 0.4, 0.6, 0.8, 1)
+  ) +
   theme_bw() +
-  theme(axis.text.x = element_text(size=18)) +
-  theme(axis.text.y = element_text(size=18)) +
-  theme(axis.title.x = element_text(size=18)) +
-  theme(axis.title.y = element_text(size=18)) +
+  theme(axis.text.x = element_text(size = 18)) +
+  theme(axis.text.y = element_text(size = 18)) +
+  theme(axis.title.x = element_text(size = 18)) +
+  theme(axis.title.y = element_text(size = 18)) +
   theme(legend.title = element_blank())
 
-setwd("~/share/groups/mas/01_projects/iUpdate/Beta Diversity with Pao_paper/01_Analysis/Figures")
-ggsave("Overall accuracy and Kappa.jpg", overall.plot,
-       width = 11, height = 9, dpi = 300,
-       device = "jpeg")
+setwd(
+  "~/share/groups/mas/01_projects/iUpdate/Beta Diversity with Pao_paper/01_Analysis/Figures"
+)
+ggsave(
+  "Overall accuracy and Kappa.jpg",
+  overall.plot,
+  width = 11,
+  height = 9,
+  dpi = 300,
+  device = "jpeg"
+)
 
 # By class results
 by.class.long <- pivot_longer(
@@ -286,58 +422,98 @@ by.class.long <- pivot_longer(
   values_to = "Value"
 )
 
-by.class.plot <- ggplot(by.class.long, 
-                        aes(x = Class, y = Value,
-                            fill = Metric, color = Metric)) +
+by.class.plot <- ggplot(
+  by.class.long,
+  aes(x = Class, y = Value, fill = Metric, color = Metric)
+) +
   geom_boxplot(width = 0.7, alpha = 0.5, position = "identity") +
   scale_color_manual(
-    values = c("Sensitivity" = viridis(100)[20],
-               "Specificity" = viridis(100)[80],
-               "Balanced.Accuracy" = viridis(100)[50]),
-    labels = c("Balanced Accuracy",
-               "Sensitivity\nTrue Positive Rate",
-               "Specificity\nTrue Negative Rate")) +
+    values = c(
+      "Sensitivity" = viridis(100)[20],
+      "Specificity" = viridis(100)[80],
+      "Balanced.Accuracy" = viridis(100)[50]
+    ),
+    labels = c(
+      "Balanced Accuracy",
+      "Sensitivity\nTrue Positive Rate",
+      "Specificity\nTrue Negative Rate"
+    )
+  ) +
   scale_fill_manual(
-    values = c("Sensitivity" = viridis(100)[20],
-               "Specificity" = viridis(100)[80],
-               "Balanced.Accuracy" = viridis(100)[50]),
-    labels = c("Balanced Accuracy",
-               "Sensitivity\nTrue Positive Rate",
-               "Specificity\nTrue Negative Rate")) +
-  scale_y_continuous(name = "Rate", lim = c(0.2, 1.0),
-                     breaks = c(0.2, 0.4, 0.6, 0.8, 1)) +
+    values = c(
+      "Sensitivity" = viridis(100)[20],
+      "Specificity" = viridis(100)[80],
+      "Balanced.Accuracy" = viridis(100)[50]
+    ),
+    labels = c(
+      "Balanced Accuracy",
+      "Sensitivity\nTrue Positive Rate",
+      "Specificity\nTrue Negative Rate"
+    )
+  ) +
+  scale_y_continuous(
+    name = "Rate",
+    lim = c(0.2, 1.0),
+    breaks = c(0.2, 0.4, 0.6, 0.8, 1)
+  ) +
   scale_x_discrete(name = "") +
   theme_bw() +
-  theme(axis.text.x = element_text(size=18, angle = 45, hjust = 1)) +
-  theme(axis.text.y = element_text(size=18)) +
-  theme(axis.title.x = element_text(size=18)) +
-  theme(axis.title.y = element_text(size=18)) +
-  theme(legend.title = element_blank()) 
+  theme(axis.text.x = element_text(size = 18, angle = 45, hjust = 1)) +
+  theme(axis.text.y = element_text(size = 18)) +
+  theme(axis.title.x = element_text(size = 18)) +
+  theme(axis.title.y = element_text(size = 18)) +
+  theme(legend.title = element_blank())
 
-setwd("~/share/groups/mas/01_projects/iUpdate/Beta Diversity with Pao_paper/01_Analysis/Figures")
-ggsave("Cover class sensitivity and specificity.jpg", by.class.plot,
-       width = 13, height = 9, dpi = 300,
-       device = "jpeg")
-
+setwd(
+  "~/share/groups/mas/01_projects/iUpdate/Beta Diversity with Pao_paper/01_Analysis/Figures"
+)
+ggsave(
+  "Cover class sensitivity and specificity.jpg",
+  by.class.plot,
+  width = 13,
+  height = 9,
+  dpi = 300,
+  device = "jpeg"
+)
 
 
 ### Systematic misclassifications
-setwd("~/share/groups/mas/01_projects/iUpdate/Beta Diversity with Pao_paper/01_Analysis/Land Cover/1st Crossvalidation/Misclass Plots")
+setwd(
+  "~/share/groups/mas/01_projects/iUpdate/Beta Diversity with Pao_paper/01_Analysis/Land Cover/1st Crossvalidation/Misclass Plots"
+)
 
 # Fixed order for x-axis
 nlcd_order <- c(
-  "Cultivated Cropland", "Hay/Pasture", "Deciduous Forest",
-  "Evergreen Forest", "Mixed Forest", "Shrubland", "Grassland",
-  "Herbaceuous Wetland", "Woody Wetland", "Barren",
-  "Urban/Developed", "Open Water", "Perennial Ice/Snow"
+  "Cultivated Cropland",
+  "Hay/Pasture",
+  "Deciduous Forest",
+  "Evergreen Forest",
+  "Mixed Forest",
+  "Shrubland",
+  "Grassland",
+  "Herbaceuous Wetland",
+  "Woody Wetland",
+  "Barren",
+  "Urban/Developed",
+  "Open Water",
+  "Perennial Ice/Snow"
 )
 
 # Fixed order for fill categories/legend
 conus_order <- c(
-  "Cultivated Cropland", "Hay/Pasture", "Deciduous Forest",
-  "Evergreen Forest", "Mixed Forest", "Shrubland", "Grassland",
-  "Herbaceuous Wetland", "Woody Wetland", "Barren",
-  "Urban/Developed", "Open Water", "Perennial Ice/Snow"
+  "Cultivated Cropland",
+  "Hay/Pasture",
+  "Deciduous Forest",
+  "Evergreen Forest",
+  "Mixed Forest",
+  "Shrubland",
+  "Grassland",
+  "Herbaceuous Wetland",
+  "Woody Wetland",
+  "Barren",
+  "Urban/Developed",
+  "Open Water",
+  "Perennial Ice/Snow"
 )
 
 # One permanent colour assignment, named by class
@@ -350,49 +526,60 @@ conus_cols <- setNames(
 )
 
 for (i in 1:length(unique(misclass.usa$Year))) {
-  
   # Filter df to particular Year
   tmp.df <- misclass.usa %>%
     filter(Year == unique(Year)[i])
-  
+
   tmp.df <- tmp.df %>%
     # Relevel nlcd_class to custom order
-    mutate(nlcd_class = factor(nlcd_class, levels = nlcd_order),
-           conus_class_ordered = factor(conus_class, levels = conus_order)) %>%
+    mutate(
+      nlcd_class = factor(nlcd_class, levels = nlcd_order),
+      conus_class_ordered = factor(conus_class, levels = conus_order)
+    ) %>%
     # Within each nlcd_class, order conus_class by descending proportion
     arrange(nlcd_class, desc(proportion))
 
-  
   # Grouped bar plot showing proportion of historical land cover classes (fill)
   # identified as the NLCD class (x axis)
   misclass.plot <- ggplot() +
-    geom_bar(data = tmp.df, aes(x = nlcd_class, y = proportion,
-                                fill = conus_class_ordered),
-             color = "black",
-             stat = "identity", position = position_dodge()) +
+    geom_bar(
+      data = tmp.df,
+      aes(x = nlcd_class, y = proportion, fill = conus_class_ordered),
+      color = "black",
+      stat = "identity",
+      position = position_dodge()
+    ) +
     scale_x_discrete(name = "NLCD Land Cover", drop = FALSE) +
     scale_y_continuous(name = "Proportion") +
-    scale_fill_manual(values = conus_cols,
-                      limits = conus_order,
-                      drop = FALSE,
-                      name = NULL) +
+    scale_fill_manual(
+      values = conus_cols,
+      limits = conus_order,
+      drop = FALSE,
+      name = NULL
+    ) +
     theme_bw() +
-    theme(axis.text.x = element_text(size=18, angle = 45, hjust = 1)) +
-    theme(axis.text.y = element_text(size=18)) +
-    theme(axis.title.x = element_text(size=18)) +
-    theme(axis.title.y = element_text(size=18)) +
+    theme(axis.text.x = element_text(size = 18, angle = 45, hjust = 1)) +
+    theme(axis.text.y = element_text(size = 18)) +
+    theme(axis.title.x = element_text(size = 18)) +
+    theme(axis.title.y = element_text(size = 18)) +
     theme(legend.title = element_blank()) +
-    theme(plot.margin = unit(c(1,1,1,3), "cm")) # top, right, bottom, left
-  
-  ggsave(paste("USA_Systemtic Misclassifications_",
-               unique(misclass.usa$Year)[i],
-               ".jpg", sep = ""),
-         misclass.plot,
-         device = "jpeg",
-         width = 11, height = 7, dpi = 300)
-  
+    theme(plot.margin = unit(c(1, 1, 1, 3), "cm")) # top, right, bottom, left
+
+  ggsave(
+    paste(
+      "USA_Systemtic Misclassifications_",
+      unique(misclass.usa$Year)[i],
+      ".jpg",
+      sep = ""
+    ),
+    misclass.plot,
+    device = "jpeg",
+    width = 11,
+    height = 7,
+    dpi = 300
+  )
+
   print(i)
-  
 }
 
 
@@ -408,58 +595,150 @@ x_max <- max(overall.cookie$Year)
 x_center <- (x_min + x_max) / 2
 
 # Overall accuracy and Kappa
-overall.cookie.plot <- ggplot(data = overall.cookie,
-                              aes(x = Year, y = Value, color = Metric)) +
-  annotate("rect", xmin = x_min, xmax = x_max, 
-           ymin = 0.0, ymax = 0.2, alpha = 0.6, fill = turbo(100)[81]) +
-  annotate("rect", xmin = x_min, xmax = x_max, 
-           ymin = 0.2, ymax = 0.4, alpha = 0.6, fill = turbo(100)[61]) +
-  annotate("rect", xmin = x_min, xmax = x_max,
-           ymin = 0.4, ymax = 0.6, alpha = 0.6, fill = turbo(100)[41]) +
-  annotate("rect", xmin = x_min, xmax = x_max,
-           ymin = 0.6, ymax = 0.8, alpha = 0.6, fill = turbo(100)[21]) +
-  annotate("rect", xmin = x_min, xmax = x_max,
-           ymin = 0.8, ymax = 1.0, alpha = 0.4, fill = turbo(100)[1]) +
-  annotate("text", x = x_center,
-           y = 0.05, label = "Slight Agreement", fontface = "italic", size = 5) +
-  annotate("text", x = x_center,
-           y = 0.25, label = "Fair Agreement", fontface = "italic", size = 5) +
-  annotate("text", x = x_center,
-           y = 0.45, label = "Moderate Agreement", fontface = "italic", size = 5) +
-  annotate("text", x = x_center,
-           y = 0.65, label = "Substantial Agreement", fontface = "italic", size = 5) +
-  annotate("text", x = x_center,
-           y = 0.85, label = "Almost Perfect Agreement", fontface = "italic", size = 5) +
+overall.cookie.plot <- ggplot(
+  data = overall.cookie,
+  aes(x = Year, y = Value, color = Metric)
+) +
+  annotate(
+    "rect",
+    xmin = x_min,
+    xmax = x_max,
+    ymin = 0.0,
+    ymax = 0.2,
+    alpha = 0.6,
+    fill = turbo(100)[81]
+  ) +
+  annotate(
+    "rect",
+    xmin = x_min,
+    xmax = x_max,
+    ymin = 0.2,
+    ymax = 0.4,
+    alpha = 0.6,
+    fill = turbo(100)[61]
+  ) +
+  annotate(
+    "rect",
+    xmin = x_min,
+    xmax = x_max,
+    ymin = 0.4,
+    ymax = 0.6,
+    alpha = 0.6,
+    fill = turbo(100)[41]
+  ) +
+  annotate(
+    "rect",
+    xmin = x_min,
+    xmax = x_max,
+    ymin = 0.6,
+    ymax = 0.8,
+    alpha = 0.6,
+    fill = turbo(100)[21]
+  ) +
+  annotate(
+    "rect",
+    xmin = x_min,
+    xmax = x_max,
+    ymin = 0.8,
+    ymax = 1.0,
+    alpha = 0.4,
+    fill = turbo(100)[1]
+  ) +
+  annotate(
+    "text",
+    x = x_center,
+    y = 0.05,
+    label = "Slight Agreement",
+    fontface = "italic",
+    size = 5
+  ) +
+  annotate(
+    "text",
+    x = x_center,
+    y = 0.25,
+    label = "Fair Agreement",
+    fontface = "italic",
+    size = 5
+  ) +
+  annotate(
+    "text",
+    x = x_center,
+    y = 0.45,
+    label = "Moderate Agreement",
+    fontface = "italic",
+    size = 5
+  ) +
+  annotate(
+    "text",
+    x = x_center,
+    y = 0.65,
+    label = "Substantial Agreement",
+    fontface = "italic",
+    size = 5
+  ) +
+  annotate(
+    "text",
+    x = x_center,
+    y = 0.85,
+    label = "Almost Perfect Agreement",
+    fontface = "italic",
+    size = 5
+  ) +
   # Add dashed horizontal lines
-  geom_hline(yintercept = c(0.2, 0.4, 0.6, 0.8),
-             linetype = "dashed", color = "black") +
+  geom_hline(
+    yintercept = c(0.2, 0.4, 0.6, 0.8),
+    linetype = "dashed",
+    color = "black"
+  ) +
   geom_errorbar(
-    data = overall.cookie.wide, 
-    aes(x = Year, y = Accuracy, ymin = AccuracyLower, ymax = AccuracyUpper,
-        color = "Accuracy"), 
-    width = 0.2, inherit.aes = FALSE) +
-  geom_point(data = overall.cookie.wide, aes(x = Year, y = Accuracy,
-                                      color = "Accuracy"),
-             size = 2) +
-  geom_point(data = overall.cookie.wide, aes(x = Year, y = Kappa,
-                                      color = "Kappa"),
-             size = 2) +
+    data = overall.cookie.wide,
+    aes(
+      x = Year,
+      y = Accuracy,
+      ymin = AccuracyLower,
+      ymax = AccuracyUpper,
+      color = "Accuracy"
+    ),
+    width = 0.2,
+    inherit.aes = FALSE
+  ) +
+  geom_point(
+    data = overall.cookie.wide,
+    aes(x = Year, y = Accuracy, color = "Accuracy"),
+    size = 2
+  ) +
+  geom_point(
+    data = overall.cookie.wide,
+    aes(x = Year, y = Kappa, color = "Kappa"),
+    size = 2
+  ) +
   scale_color_manual(
     values = c("Accuracy" = "black", "Kappa" = "red"),
-    labels = c("Overall Accuracy", "Cohen's Kappa")) +
-  scale_y_continuous(name = "Accuracy", lim = c(0, 1.0),
-                     breaks = c(0, 0.2, 0.4, 0.6, 0.8, 1)) +
+    labels = c("Overall Accuracy", "Cohen's Kappa")
+  ) +
+  scale_y_continuous(
+    name = "Accuracy",
+    lim = c(0, 1.0),
+    breaks = c(0, 0.2, 0.4, 0.6, 0.8, 1)
+  ) +
   theme_bw() +
-  theme(axis.text.x = element_text(size=18)) +
-  theme(axis.text.y = element_text(size=18)) +
-  theme(axis.title.x = element_text(size=18)) +
-  theme(axis.title.y = element_text(size=18)) +
+  theme(axis.text.x = element_text(size = 18)) +
+  theme(axis.text.y = element_text(size = 18)) +
+  theme(axis.title.x = element_text(size = 18)) +
+  theme(axis.title.y = element_text(size = 18)) +
   theme(legend.title = element_blank())
 
-setwd("~/share/groups/mas/01_projects/iUpdate/Beta Diversity with Pao_paper/01_Analysis/Figures")
-ggsave("Overall accuracy and Kappa for cookies.jpg", overall.cookie.plot,
-       width = 11, height = 9, dpi = 300,
-       device = "jpeg")
+setwd(
+  "~/share/groups/mas/01_projects/iUpdate/Beta Diversity with Pao_paper/01_Analysis/Figures"
+)
+ggsave(
+  "Overall accuracy and Kappa for cookies.jpg",
+  overall.cookie.plot,
+  width = 11,
+  height = 9,
+  dpi = 300,
+  device = "jpeg"
+)
 
 # By class results
 by.class.cookie.long <- pivot_longer(
@@ -473,42 +752,62 @@ by.class.cookie.long <- pivot_longer(
 by.class.cookie.long <- by.class.cookie.long %>%
   filter(Class != "Unclassified" & Class != "Unknown")
 
-by.class.cookie.plot <- ggplot(by.class.cookie.long, 
-                        aes(x = Class, y = Value,
-                            fill = Metric, color = Metric)) +
+by.class.cookie.plot <- ggplot(
+  by.class.cookie.long,
+  aes(x = Class, y = Value, fill = Metric, color = Metric)
+) +
   geom_boxplot(width = 0.7, alpha = 0.5, position = "identity") +
   scale_color_manual(
-    values = c("Sensitivity" = viridis(100)[20],
-               "Specificity" = viridis(100)[80],
-               "Balanced.Accuracy" = viridis(100)[50]),
-    labels = c("Balanced Accuracy",
-               "Sensitivity\nTrue Positive Rate",
-               "Specificity\nTrue Negative Rate")) +
+    values = c(
+      "Sensitivity" = viridis(100)[20],
+      "Specificity" = viridis(100)[80],
+      "Balanced.Accuracy" = viridis(100)[50]
+    ),
+    labels = c(
+      "Balanced Accuracy",
+      "Sensitivity\nTrue Positive Rate",
+      "Specificity\nTrue Negative Rate"
+    )
+  ) +
   scale_fill_manual(
-    values = c("Sensitivity" = viridis(100)[20],
-               "Specificity" = viridis(100)[80],
-               "Balanced.Accuracy" = viridis(100)[50]),
-    labels = c("Balanced Accuracy",
-               "Sensitivity\nTrue Positive Rate",
-               "Specificity\nTrue Negative Rate")) +
-  scale_y_continuous(name = "Rate", lim = c(0.2, 1.0),
-                     breaks = c(0.2, 0.4, 0.6, 0.8, 1)) +
+    values = c(
+      "Sensitivity" = viridis(100)[20],
+      "Specificity" = viridis(100)[80],
+      "Balanced.Accuracy" = viridis(100)[50]
+    ),
+    labels = c(
+      "Balanced Accuracy",
+      "Sensitivity\nTrue Positive Rate",
+      "Specificity\nTrue Negative Rate"
+    )
+  ) +
+  scale_y_continuous(
+    name = "Rate",
+    lim = c(0.2, 1.0),
+    breaks = c(0.2, 0.4, 0.6, 0.8, 1)
+  ) +
   scale_x_discrete(name = "") +
   theme_bw() +
-  theme(axis.text.x = element_text(size=18, angle = 45, hjust = 1)) +
-  theme(axis.text.y = element_text(size=18)) +
-  theme(axis.title.x = element_text(size=18)) +
-  theme(axis.title.y = element_text(size=18)) +
-  theme(legend.title = element_blank()) 
+  theme(axis.text.x = element_text(size = 18, angle = 45, hjust = 1)) +
+  theme(axis.text.y = element_text(size = 18)) +
+  theme(axis.title.x = element_text(size = 18)) +
+  theme(axis.title.y = element_text(size = 18)) +
+  theme(legend.title = element_blank())
 
-setwd("~/share/groups/mas/01_projects/iUpdate/Beta Diversity with Pao_paper/01_Analysis/Figures")
-ggsave("Cover class sensitivity and specificity.jpg", by.class.plot,
-       width = 13, height = 9, dpi = 300,
-       device = "jpeg")
+setwd(
+  "~/share/groups/mas/01_projects/iUpdate/Beta Diversity with Pao_paper/01_Analysis/Figures"
+)
+ggsave(
+  "Cover class sensitivity and specificity.jpg",
+  by.class.plot,
+  width = 13,
+  height = 9,
+  dpi = 300,
+  device = "jpeg"
+)
 
 # Next: for the pixels that CONUS did not classify correctly, what class
 # does it see those pixels as?
-
 
 ###############################################
 ###                                         ###
@@ -530,7 +829,12 @@ cookies <- cookies[, -1]
 cookies <- unique(cookies)
 
 # merge the shapefile with the accuracy information
-polygon.accuracy <- merge(overall.by.polygon, cookies[ , c(1, 4)], by = "ID__200", all.x = TRUE)
+polygon.accuracy <- merge(
+  overall.by.polygon,
+  cookies[, c(1, 4)],
+  by = "ID__200",
+  all.x = TRUE
+)
 polygon.accuracy <- st_as_sf(polygon.accuracy, crs = crs(cookies))
 
 
@@ -549,8 +853,8 @@ kappa.map <- ggplot() +
   geom_sf(data = kappa, aes(fill = mean)) +
   theme_bw() +
   coord_sf(datum = st_crs(4735)) +
-  theme(axis.text.x = element_text(size=18)) +
-  theme(axis.text.y = element_text(size=18)) +
+  theme(axis.text.x = element_text(size = 18)) +
+  theme(axis.text.y = element_text(size = 18)) +
   # theme(axis.ticks.x = element_blank()) +
   # theme(axis.ticks.y = element_blank()) +
   theme(axis.title.x = element_blank()) +
@@ -558,12 +862,14 @@ kappa.map <- ggplot() +
   # theme(legend.position = "none") +
   # scale_x_continuous(name="Longitude") +
   # scale_y_continuous(name="Latitude") +
-  scale_fill_continuous(name="Cohen's\nKappa",
-                        type = "viridis") +
+  scale_fill_continuous(name = "Cohen's\nKappa", type = "viridis") +
   # scale_color_gradient(name = "Total Years", low = "#440154", high = "#fde725",
   #                      breaks = c(20, 30, 40, 50)) +
-  theme(legend.text = element_text(size=18), legend.title = element_text(size = 20)) +
-  guides(color = guide_legend(override.aes = list(size=5)))
+  theme(
+    legend.text = element_text(size = 18),
+    legend.title = element_text(size = 20)
+  ) +
+  guides(color = guide_legend(override.aes = list(size = 5)))
 # theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
 #       panel.background = element_blank())
 
