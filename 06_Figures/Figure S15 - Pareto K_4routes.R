@@ -81,7 +81,7 @@ cookies <- unique(as.character(data$cookie))
 
 # Assume P is your matrix and labnames is length 66
 df <- as.data.frame(P)
-df$id <- 1:nrow(df)
+df$id <- seq_len(nrow(df))
 df$label <- cookies
 
 # Convert to long format for ggplot

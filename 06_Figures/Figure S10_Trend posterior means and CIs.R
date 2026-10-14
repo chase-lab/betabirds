@@ -67,7 +67,7 @@ cookies <- data$cookie
 # Make dataframe for all estimates
 all.estimates_q0 <- data.frame()
 
-for (j in 1:length(mod.list)) {
+for (j in seq_along(mod.list)) {
   mod <- mod.list[[j]]
 
   # Processing to extract model predictions
@@ -276,7 +276,7 @@ cookies <- data$cookie
 # Make dataframe for all estimates
 all.estimates_q1 <- data.frame()
 
-for (j in 1:length(mod.list)) {
+for (j in seq_along(mod.list)) {
   mod <- mod.list[[j]]
 
   # Processing to extract model predictions
@@ -418,7 +418,7 @@ cookies <- data$cookie
 # Make dataframe for all estimates
 all.estimates_q2 <- data.frame()
 
-for (j in 1:length(mod.list)) {
+for (j in seq_along(mod.list)) {
   mod <- mod.list[[j]]
 
   # Processing to extract model predictions

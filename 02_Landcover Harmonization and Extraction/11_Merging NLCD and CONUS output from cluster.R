@@ -108,7 +108,7 @@ lulc.area <- data.frame(
 ###                                         ###
 ###############################################
 
-for (i in 1:length(eve.files_area)) {
+for (i in seq_along(eve.files_area)) {
   # Read in the year file
   setwd(lulc.path)
   test <- read.csv(eve.files_area[i], header = TRUE)
@@ -126,7 +126,7 @@ for (i in 1:length(eve.files_area)) {
 } # end of i loop
 
 
-for (i in 1:length(eve.files)) {
+for (i in seq_along(eve.files)) {
   # Read in the year file
   setwd(lulc.path)
   test <- read.csv(eve.files[i], header = TRUE)

@@ -56,14 +56,14 @@ overall <- data.frame()
 ###               Interval                  ###
 ###############################################
 
-for (i in 1:length(intervals)) {
+for (i in seq_along(intervals)) {
   # set working directory for the files
   setwd(path)
 
   # Create blank dataframe to combine read in files
   tmp.file <- data.frame()
 
-  for (j in 1:length(key$interval[key$interval == i])) {
+  for (j in seq_along(key$interval[key$interval == i])) {
     # Read in the four files in the interval
     file.info <- read.csv(key$file[key$interval == i][j])
 

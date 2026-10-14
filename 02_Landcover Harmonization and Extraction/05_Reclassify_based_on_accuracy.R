@@ -73,7 +73,7 @@ path2 <- "~/share/groups/mas/01_projects/iUpdate/Beta Diversity with Pao_paper/0
 
 start.time <- Sys.time()
 
-for (i in 1:length(lulc.files)) {
+for (i in seq_along(lulc.files)) {
   lc.rast <- terra::rast(paste(lulc.path, lulc.files[i], sep = ""))
 
   # Extract the year
@@ -148,7 +148,7 @@ path2 <- "~/share/groups/mas/01_projects/iUpdate/Beta Diversity with Pao_paper/0
 
 start.time <- Sys.time()
 
-for (i in 1:length(lulc.files)) {
+for (i in seq_along(lulc.files)) {
   lc.rast <- terra::rast(paste(lulc.path, lulc.files[i], sep = ""))
 
   # Extract the year

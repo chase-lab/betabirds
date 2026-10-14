@@ -80,7 +80,7 @@ lulc.files <- list.files(lulc.path, pattern = ".tif")
 
 start.time <- Sys.time()
 
-for (i in 1:length(lulc.files)) {
+for (i in seq_along(lulc.files)) {
   lc.rast <- terra::rast(paste(lulc.path, lulc.files[i], sep = ""))
 
   # Extract the year

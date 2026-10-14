@@ -114,7 +114,7 @@ overall.misclass_usa <- data.frame()
 ###               for cookies               ###
 ###############################################
 
-for (i in 1:length(yr.files)) {
+for (i in seq_along(yr.files)) {
   # Read in the file
   setwd(paste(path, "Cookie Classification by year", sep = ""))
   yr <- read.csv(yr.files[i])
@@ -122,7 +122,7 @@ for (i in 1:length(yr.files)) {
   # Extract the year
   year <- substr(yr.files[i], 23, 26)
 
-  for (j in 1:length(Class)) {
+  for (j in seq_along(Class)) {
     # Filter nlcd to each cover
     yr.filtered <- yr %>%
       filter(nlcd_class == Class[j])
@@ -174,7 +174,7 @@ rm(misclass, overall.misclass, yr, yr.filtered, i, j, year)
 ###               for all USA               ###
 ###############################################
 
-for (i in 1:length(yr.files_usa)) {
+for (i in seq_along(yr.files_usa)) {
   # Read in the file
   setwd(paste(path, "USA Classification by year", sep = ""))
   yr <- read.csv(yr.files_usa[i])
@@ -182,7 +182,7 @@ for (i in 1:length(yr.files_usa)) {
   # Extract the year
   year <- substr(yr.files_usa[i], 20, 23)
 
-  for (j in 1:length(Class)) {
+  for (j in seq_along(Class)) {
     # Filter nlcd to each cover
     yr.filtered <- yr %>%
       filter(nlcd_class == Class[j])

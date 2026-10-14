@@ -66,7 +66,7 @@ state.list <- list.files(getwd())
 # Create blank dataframe
 master <- data.frame()
 
-for (i in 1:length(state.list)) {
+for (i in seq_along(state.list)) {
   tmp.file <- read.csv(state.list[i], header = TRUE)
 
   master <- rbind(master, tmp.file)

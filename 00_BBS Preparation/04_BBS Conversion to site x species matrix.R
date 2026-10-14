@@ -77,7 +77,7 @@ year_intervals <- list(
 )
 
 # Loop through each interval
-for (i in 1:length(year_intervals)) {
+for (i in seq_along(year_intervals)) {
   # Get current interval
   start_year <- year_intervals[[i]][1]
   end_year <- year_intervals[[i]][2]
@@ -130,7 +130,7 @@ for (i in 1:length(year_intervals)) {
 
 ssmatrix <- list.files(getwd())
 
-for (i in 1:length(ssmatrix)) {
+for (i in seq_along(ssmatrix)) {
   test <- read.csv(ssmatrix[i])
 
   print(i)

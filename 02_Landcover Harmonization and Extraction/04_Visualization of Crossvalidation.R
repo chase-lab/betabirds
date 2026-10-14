@@ -525,7 +525,7 @@ conus_cols <- setNames(
   conus_order
 )
 
-for (i in 1:length(unique(misclass.usa$Year))) {
+for (i in seq_along(unique(misclass.usa$Year))) {
   # Filter df to particular Year
   tmp.df <- misclass.usa %>%
     filter(Year == unique(Year)[i])

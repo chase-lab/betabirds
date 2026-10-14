@@ -102,7 +102,7 @@ cookies <- sf::st_transform(cookies, crs = albers)
 # Path to save intermediate output
 path3 <- "~/share/groups/mas/01_projects/iUpdate/Beta Diversity with Pao_paper/01_Analysis/Land Cover/Cookie Crossvalidation/USA Classification by year/"
 
-for (i in 1:length(conus.files)) {
+for (i in seq_along(conus.files)) {
   # Read in the year's files
   setwd(path)
   nlcd <- terra::rast(nlcd.files[i])
@@ -318,7 +318,7 @@ write.csv(
 polygon_overall <- data.frame()
 polygon_byclass <- data.frame()
 
-for (i in 1:length(conus.files)) {
+for (i in seq_along(conus.files)) {
   # Read in the year's files
   setwd(path)
   nlcd <- terra::rast(nlcd.files[i])

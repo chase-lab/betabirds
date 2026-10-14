@@ -41,7 +41,7 @@ cookie_ID <- cookies_routes_assembled %>%
   rename(unique_route = uniq_rt) %>%
   as.data.frame() %>%
   select(-geometry)
-year_range <- 1:length(data_list)
+year_range <- seq_along(data_list)
 
 add_cookie_year <- function(df, year) {
   df <- df %>%

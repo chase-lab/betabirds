@@ -110,8 +110,8 @@ int12_merged <- merge(
 
 # Based on previous script there should only be one NA value where the
 # AOU did not match any species in the BBS species list: AOU 4890
-which(is.na(int1_merged$English_Common_Name) == TRUE)
-which(is.na(int12_merged$English_Common_Name) == TRUE)
+which(is.na(int1_merged$English_Common_Name))
+which(is.na(int12_merged$English_Common_Name))
 # Confirmed
 
 # Save abundance dataframes

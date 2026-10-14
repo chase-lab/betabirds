@@ -304,7 +304,7 @@ print("Raster converted to categorical")
 
 #######################################
 
-for (j in 1:length(unique(lulc.predictors$unique_route))) {
+for (j in seq_along(unique(lulc.predictors$unique_route))) {
   # number of routes
 
   ###################################################
@@ -361,7 +361,7 @@ for (j in 1:length(unique(lulc.predictors$unique_route))) {
   #############################################################################
   ### Add the proportional cover for each cover type to the blank dataframe ###
 
-  for (k in 1:length(tmp.df_sum$Class)) {
+  for (k in seq_along(tmp.df_sum$Class)) {
     # for each cover type represented in the route
 
     for (m in 3:length(colnames(lulc.predictors))) {
